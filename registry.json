@@ -11,3 +11,16 @@
     "registered_at": "2026-03-20"
   }
 }
+{
+  "NetMax": {
+    "name": "coffee",
+    "version": "1.0.0",
+    "author": "CzaxStudio",
+    "license": "MIT",
+    "description": "Premium all-in-one recon library — DNS, ports, web, CIDR, scoring and more.",
+    "source": "https://raw.githubusercontent.com/CzaxStudio/Spectator/refs/heads/main/Coffee.str",
+    "github": "https://github.com/CzaxStudio/Spectator",
+    "keywords": ["recon", "dns", "portscan", "web", "osint", "pentest", "subdomain"],
+    "registered_at": "2026-03-20"
+  }
+}
