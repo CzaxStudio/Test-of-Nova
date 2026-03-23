@@ -7,11 +7,9 @@ I worked with many programming languages for cybersecurity and I found a common 
 
 I made Spectator, **an easy and fast programming language for cybersecurity**, make your own tools for Cybersecurity.
 
-**You can make Console Apps, GUIs and TUIs all cross platform.**
+**You can make Console Apps, GUI tools, TUI tools and you can even make your own libraries, all cross platform.**
 
-''JS
-
-Hello
+Download For Linux, Mac
 
 # Important
 
