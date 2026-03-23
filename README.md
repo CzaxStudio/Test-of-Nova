@@ -9,7 +9,7 @@ I made Spectator, **an easy and fast programming language for cybersecurity**, m
 
 **You can make Console Apps, GUIs and TUIs all cross platform.**
 
-''JS''
+'''JS
 
 Hello
 
