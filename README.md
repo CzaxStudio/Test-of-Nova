@@ -9,8 +9,6 @@ I made Spectator, **an easy and fast programming language for cybersecurity**, m
 
 **You can make Console Apps, GUI tools, TUI tools and you can even make your own libraries, all cross platform.**
 
-Download For Linux, Mac
+Download For Linux, Mac, Windows 
 
-# Important
-
-Use the tool with permission. 
+**Become a hacker now stay safe and keep others safe!**
