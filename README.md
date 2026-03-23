@@ -11,4 +11,4 @@ I made Spectator, **an easy and fast programming language for cybersecurity**, m
 
 Download For Linux, Mac, Windows 
 
-**Become a hacker now stay safe and keep others safe!**
+**Become a hacker, stay safe and keep others safe!**
