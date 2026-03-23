@@ -8,7 +8,7 @@
     "source": "https://raw.githubusercontent.com/CzaxStudio/Spectator/refs/heads/main/Coffee",
     "github": "https://github.com/CzaxStudio/Spectator",
     "keywords": ["recon", "dns", "portscan", "web", "osint", "pentest"],
-    "sha256": "",
+    "sha256": "3f727513803457a9bb08e300a42fbc00922c063c07a6701069b6003a3fc8d97c",
     "registered_at": "2026-03-20"
   },
   "ghost": {
@@ -20,7 +20,7 @@
     "source": "https://raw.githubusercontent.com/CzaxStudio/Spectator/refs/heads/main/Ghost",
     "github": "https://github.com/CzaxStudio/Spectator",
     "keywords": ["osint", "recon", "email", "username", "domain", "ip", "investigation"],
-    "sha256": "",
+    "sha256": "79d00bb94229eee0154e6671f7b1e7c8c612ae56583a8d9f9ba29eaaff410987",
     "registered_at": "2026-03-21"
   }
 }
