@@ -1,0 +1,10 @@
+#Import Spec.GUI
+
+open.window({
+  "title":  "My App",
+  "width":  800,
+  "height": 500,
+  "bg":     "#0a0f1a"
+})
+
+end()

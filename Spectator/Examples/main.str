@@ -1,0 +1,29 @@
+## Ghost OSINT — Person / Username Investigation
+#Import ghost
+
+ghost_banner("Person OSINT", "1.0")
+Trace("What do you know about the target?")
+choice = Capture("Search by (1) Username  (2) Email  (3) Full Name : ")
+
+match choice {
+  "1" => {
+    uname = Capture("Username: ")
+    ghost_username(uname)
+    ghost_social(uname)
+  }
+  "2" => {
+    email = Capture("Email: ")
+    ghost_email(email)
+    ghost_breach_check(email)
+  }
+  "3" => {
+    name = Capture("Full Name: ")
+    ghost_person(name)
+  }
+  _ => {
+    Trace("Invalid choice — running username search")
+    uname = Capture("Username: ")
+    ghost_username(uname)
+  }
+}
+Trace("Done!")

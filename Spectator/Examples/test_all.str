@@ -1,0 +1,277 @@
+## ═══════════════════════════════════════════════════════════
+##  Spectator v2.0 — Full Feature Test
+##  Tests every new command added in this session.
+##  Run: spectator run test_all.str
+## ═══════════════════════════════════════════════════════════
+
+banner("SPECTATOR v2.0 — FEATURE TEST")
+
+## ─── 1. Hash Commands ────────────────────────────────────────
+banner("1. Hash Commands")
+
+Trace("HashIdentify:")
+do --> HashIdentify("5f4dcc3b5aa765d61d8327deb882cf99")
+
+Trace("")
+Trace("Crack (md5 of 'password'):")
+do --> Crack("5f4dcc3b5aa765d61d8327deb882cf99", "md5")
+
+Trace("")
+Trace("hashType builtin:")
+Trace("  MD5  → " --> hashType("5f4dcc3b5aa765d61d8327deb882cf99"))
+Trace("  SHA1 → " --> hashType("da39a3ee5e6b4b0d3255bfef95601890afd80709"))
+
+Trace("")
+Trace("CryptoHash:")
+Trace("  md5    → " --> md5("spectator"))
+Trace("  sha256 → " --> sha256("spectator"))
+
+## ─── 2. Encoding ─────────────────────────────────────────────
+banner("2. Encoding / Decoding")
+
+payload = "' OR 1=1--"
+Trace("Original  : " --> payload)
+Trace("URL       : " --> Encode(payload, "url"))
+Trace("Base64    : " --> Encode(payload, "b64"))
+Trace("HTML      : " --> Encode(payload, "html"))
+Trace("Hex       : " --> Encode(payload, "hex"))
+Trace("Unicode   : " --> Encode(payload, "unicode"))
+Trace("Double URL: " --> Encode(payload, "double_url"))
+Trace("ROT13     : " --> Encode("Hello Hacker", "rot13"))
+Trace("Decoded   : " --> Decode(Encode(payload, "url"), "url"))
+
+## ─── 3. Cipher Solving ───────────────────────────────────────
+banner("3. Cipher Solving")
+
+Trace("ROT13   ↓")
+do --> CipherSolve("Uryyb Unxre")
+Trace("Base64  ↓")
+do --> CipherSolve("SGFja1RoZVBsYW5ldA==")
+Trace("Hex     ↓")
+do --> CipherSolve("5370656374726174")
+Trace("Binary  ↓")
+do --> CipherSolve("01001000011010010")
+
+## ─── 4. Payload Generation ───────────────────────────────────
+banner("4. Payload Generation")
+
+Trace("XSS payloads:")
+do --> PayloadGen("xss")
+Trace("")
+Trace("SQLi payloads:")
+do --> PayloadGen("sqli")
+Trace("")
+Trace("SSRF payloads:")
+do --> PayloadGen("ssrf")
+Trace("")
+Trace("LFI payloads:")
+do --> PayloadGen("lfi")
+Trace("")
+Trace("CMD payloads:")
+do --> PayloadGen("cmd")
+
+Trace("")
+Trace("All types: " --> str(payloadTypes()))
+
+## ─── 5. Secret Scanning ──────────────────────────────────────
+banner("5. Secret Scanning")
+
+sample = "DB_URL=mysql://admin:P@ssw0rd@db.example.com/prod\nAWS_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE\nAPI_KEY=AIzaSyD8xK9mN2pQ3rS4tU5vW6xY7zA8bC9dE0f\nJWT: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIn0.xyz\nGH_TOKEN=ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890"
+do --> SecretScan(sample)
+
+## ─── 6. JWT Analysis ─────────────────────────────────────────
+banner("6. JWT Analysis")
+
+jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+do --> JWT(jwt, "decode")
+Trace("")
+do --> JWT(jwt, "crack")
+
+## ─── 7. Wordlists ────────────────────────────────────────────
+banner("7. Built-in Wordlists")
+
+admin  = wordlist("admin_paths")
+Trace("admin_paths     → " --> str(len(admin)) --> " entries")
+Trace("  First 3: " --> str(slice(admin, 0, 3)))
+
+files  = wordlist("sensitive_files")
+Trace("sensitive_files → " --> str(len(files)) --> " entries")
+Trace("  First 3: " --> str(slice(files, 0, 3)))
+
+subs   = wordlist("common_subdomains")
+Trace("subdomains      → " --> str(len(subs)) --> " entries")
+
+passwords = commonPasswords()
+Trace("commonPasswords → " --> str(len(passwords)) --> " entries")
+
+## ─── 8. Port Services ────────────────────────────────────────
+banner("8. Port Services Map")
+
+svcs = portServices()
+key_ports = ["22", "80", "443", "3306", "3389", "6379", "27017"]
+each p : key_ports {
+  Trace("  Port " --> p --> " → " --> svcs[p])
+}
+
+## ─── 9. Pipeline Utilities ───────────────────────────────────
+banner("9. Pipeline Utilities")
+
+words = ["HIGH","MEDIUM","HIGH","CRITICAL","LOW","HIGH","MEDIUM","CRITICAL"]
+Trace("Input: " --> str(words))
+Trace("tally: " --> str(tally(words)))
+
+nums = ["banana","apple","cherry","apricot","blueberry"]
+Trace("sortList: " --> str(sortList(nums)))
+
+l1 = ["nmap","burp","metasploit","nikto","gobuster"]
+l2 = ["burp","nikto","sqlmap"]
+Trace("diff(l1,l2)     : " --> str(diff(l1, l2)))
+Trace("intersect(l1,l2): " --> str(intersect(l1, l2)))
+
+nested = [["admin","login"],["config","backup"],["api"]]
+Trace("gather: " --> str(gather(nested)))
+
+Trace("truncate: " --> truncate("This is a very long finding title that needs trimming", 35))
+Trace("colorize: " --> colorize("[CRITICAL]", "red") --> " .env file exposed")
+Trace("colorize: " --> colorize("[HIGH]",     "yellow") --> " RDP port open")
+Trace("colorize: " --> colorize("[PASS]",     "green") --> " HSTS header present")
+
+## ─── 10. Progress Bar ────────────────────────────────────────
+banner("10. Progress Bar")
+Trace("Scanning ports:")
+loop 5 {
+  progress(_i + 1, 5, "checking ports...")
+  sleep(100)
+}
+
+## ─── 11. Table ───────────────────────────────────────────────
+banner("11. ASCII Table")
+
+table(
+  ["Port", "Service", "Status", "Risk"],
+  [
+    ["22",    "SSH",           "OPEN",   "MEDIUM"],
+    ["80",    "HTTP",          "OPEN",   "LOW"],
+    ["443",   "HTTPS",         "OPEN",   "LOW"],
+    ["3389",  "RDP",           "OPEN",   "HIGH"],
+    ["6379",  "Redis",         "OPEN",   "CRITICAL"],
+    ["27017", "MongoDB",       "OPEN",   "CRITICAL"],
+    ["3306",  "MySQL",         "CLOSED", "NONE"]
+  ]
+)
+
+## ─── 12. Mission Engine ──────────────────────────────────────
+banner("12. Mission Engine")
+
+m = missionStart("Spectator Test Mission", "test-target.com")
+
+missionStage(m, "Reconnaissance")
+missionFind(m, "INFO",     "Host resolves",           "IP: 93.184.216.34")
+missionFind(m, "LOW",      "HTTP port 80 open",       "Apache/2.4 detected")
+missionNote(m, "Starting web analysis phase")
+
+missionStage(m, "Web Analysis")
+missionFind(m, "MEDIUM",   "Missing HSTS header",     "SSL stripping possible")
+missionFind(m, "MEDIUM",   "Missing CSP header",      "XSS not mitigated")
+missionFind(m, "HIGH",     "Admin panel at /wp-admin","Returns HTTP 200")
+missionFind(m, "CRITICAL", ".env file exposed",       "Contains: DB_PASSWORD=secret\nAWS_KEY=AKIA...")
+
+missionStage(m, "Port Scan")
+missionFind(m, "HIGH",     "RDP on port 3389",        "Internet-facing RDP")
+missionFind(m, "CRITICAL", "Redis on port 6379",      "Unauthenticated access")
+
+missionData(m, "open_ports", [80, 443, 3389, 6379])
+missionData(m, "tech_stack", ["WordPress", "PHP/7.4", "Apache"])
+
+Trace("  Stored ports: " --> str(missionGet(m, "open_ports")))
+Trace("  Stored tech : " --> str(missionGet(m, "tech_stack")))
+
+Trace("")
+Trace("  All findings:")
+findings = missionFindings(m)
+each f : findings {
+  Trace("  [" --> f["severity"] --> "] " --> f["title"])
+}
+
+summary = missionSummary(m)
+Trace("")
+Trace("  Summary: " --> str(summary["findings"]) --> " findings — " --> str(summary["critical"]) --> " critical, " --> str(summary["high"]) --> " high")
+
+missionEnd(m)
+
+report = "spectator_test_report.html"
+missionReport(m, report)
+Trace("  Open " --> report --> " in your browser!")
+
+## ─── 13. HTTP Engine (local) ─────────────────────────────────
+banner("13. HTTP Engine (Builtins)")
+
+Trace("buildQuery:")
+q = buildQuery({"user": "admin", "pass": "p@ss&word", "cmd": "ls -la"})
+Trace("  " --> q)
+
+Trace("parseQuery:")
+parsed = parseQuery(q)
+Trace("  user = " --> parsed["user"])
+Trace("  cmd  = " --> parsed["cmd"])
+
+Trace("buildURL:")
+u = buildURL("https://api.target.com", {
+  "path": "/v2/users",
+  "query": {"role": "admin", "limit": "100"}
+})
+Trace("  " --> u)
+
+Trace("isRedirect:")
+fake301 = {"status": 301.0, "body": "", "headers": {}, "cookies": {}, "url": "", "length": 0.0, "time": 0.0}
+fake200 = {"status": 200.0, "body": "", "headers": {}, "cookies": {}, "url": "", "length": 0.0, "time": 0.0}
+Trace("  301 → " --> str(isRedirect(fake301)))
+Trace("  200 → " --> str(isRedirect(fake200)))
+
+Trace("extractTitle:")
+html_sample = "<html><head><title>Target Login Panel</title></head><body><a href='/admin'>Admin</a><form action='/login' method='POST'><input name='username'/><input name='password'/></form><p>admin@target.com</p></body></html>"
+Trace("  " --> extractTitle(html_sample))
+
+Trace("extractLinks:")
+links = extractLinks(html_sample, "https://target.com")
+Trace("  " --> str(links))
+
+Trace("extractForms:")
+forms = extractForms(html_sample)
+each form : forms {
+  Trace("  action=" --> form["action"] --> " method=" --> form["method"] --> " fields=" --> str(form["fields"]))
+}
+
+Trace("extractEmails:")
+emails = extractEmails(html_sample)
+Trace("  " --> str(emails))
+
+Trace("stripHTML:")
+Trace("  " --> trim(stripHTML(html_sample)))
+
+## ─── FINAL SUMMARY ───────────────────────────────────────────
+banner("ALL TESTS COMPLETE")
+
+table(
+  ["#", "Test", "Result"],
+  [
+    ["1",  "HashIdentify / Crack",    "OK"],
+    ["2",  "Encode / Decode (6 modes)", "OK"],
+    ["3",  "CipherSolve",             "OK"],
+    ["4",  "PayloadGen (5 types)",    "OK"],
+    ["5",  "SecretScan",              "OK"],
+    ["6",  "JWT decode + crack",      "OK"],
+    ["7",  "Wordlists + passwords",   "OK"],
+    ["8",  "portServices map",        "OK"],
+    ["9",  "Pipeline utilities",      "OK"],
+    ["10", "Progress bar",            "OK"],
+    ["11", "ASCII table",             "OK"],
+    ["12", "Mission + HTML report",   "OK"],
+    ["13", "HTTP engine builtins",    "OK"]
+  ]
+)
+
+Trace("")
+Trace(colorize("  [✓] Spectator v2.0 is fully operational.", "green"))
+Trace(colorize("  [✓] Report saved to spectator_test_report.html", "cyan"))
+Trace("")

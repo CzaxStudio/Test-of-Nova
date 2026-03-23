@@ -1,0 +1,847 @@
+## ═══════════════════════════════════════════════════════════════════════════
+##
+##    ██████╗ ██╗  ██╗ ██████╗ ███████╗████████╗
+##   ██╔════╝ ██║  ██║██╔═══██╗██╔════╝╚══██╔══╝
+##   ██║  ███╗███████║██║   ██║███████╗   ██║
+##   ██║   ██║██╔══██║██║   ██║╚════██║   ██║
+##   ╚██████╔╝██║  ██║╚██████╔╝███████║   ██║
+##    ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝
+##
+##  Ghost — Professional OSINT Library for Spectator
+##  Version  : 1.0.0
+##  Author   : CzaxStudio
+##  License  : MIT
+##  Install  : spectator space get ghost
+##  Use      : #Import ghost
+##
+##  Gathers only 100% public, open-source information.
+##  For: research, journalism, security investigations.
+##
+## ═══════════════════════════════════════════════════════════════════════════
+
+## ─── Display helpers ─────────────────────────────────────────────────────────
+
+func ghost_ok(msg)   { Trace("  [+] " --> msg) }
+func ghost_warn(msg) { Trace("  [!] " --> msg) }
+func ghost_info(msg) { Trace("  [*] " --> msg) }
+func ghost_hit(msg)  { Trace("  [>>] " --> msg) }
+func ghost_err(msg)  { Trace("  [-] " --> msg) }
+
+func ghost_separator(label) {
+  Trace("")
+  Trace("  ╔══════════════════════════════════════════════════════════╗")
+  Trace("  ║  " --> label)
+  Trace("  ╚══════════════════════════════════════════════════════════╝")
+}
+
+func ghost_section(label) {
+  Trace("")
+  Trace("  +--[ " --> label --> " ]")
+  Trace("")
+}
+
+## ─── ghost_banner ────────────────────────────────────────────────────────────
+
+func ghost_banner(tool, version) {
+  Trace("  ╔══════════════════════════════════════════════════════════╗")
+  Trace("  ║  GHOST OSINT  //  " --> tool --> "  v" --> version)
+  Trace("  ║  Spectator v2.0  ·  Open Source Intelligence Library")
+  Trace("  ╚══════════════════════════════════════════════════════════╝")
+  ghost_info("Started : " --> ghost_timestamp())
+  Trace("")
+}
+
+## ─── ghost_timestamp ─────────────────────────────────────────────────────────
+
+func ghost_timestamp() {
+  return timestamp()
+}
+
+## ─── ghost_save ──────────────────────────────────────────────────────────────
+
+func ghost_save(filename, content) {
+  ts = ghost_timestamp()
+  try {
+    appendFile(filename, "[" --> ts --> "] " --> content --> "\n")
+    ghost_ok("Saved: " --> filename)
+  } catch e {
+    ghost_err("Save failed: " --> e)
+  }
+}
+
+## ─── ghost_domain ────────────────────────────────────────────────────────────
+## Full domain OSINT: DNS, WHOIS, subdomains, web tech, emails.
+## Usage: ghost_domain("example.com")
+
+func ghost_domain(domain) {
+  ghost_separator("DOMAIN OSINT  >>  " --> domain)
+
+  ghost_section("DNS Records")
+  try { do --> Recon(domain) } catch e { ghost_err("DNS: " --> e) }
+
+  ghost_section("WHOIS — Registration Info")
+  try { do --> WHOIs(domain) } catch e {
+    ghost_err("WHOIS failed — check manually:")
+    Trace("  https://www.whois.com/whois/" --> domain)
+  }
+
+  ghost_section("IP Resolution + Geolocation")
+  ips = []
+  try {
+    ips = resolve(domain)
+    each ip : ips {
+      ghost_ok("Resolved: " --> ip)
+      try { do --> GeoIP(ip) } catch e { ghost_err("GeoIP: " --> e) }
+    }
+  } catch e { ghost_err("Resolve: " --> e) }
+
+  ghost_section("SSL Certificate")
+  try { do --> SSLInfo(domain) } catch e { ghost_err("SSL: " --> e) }
+
+  ghost_section("Web Technology Stack")
+  try {
+    do --> TechDetect("https://" --> domain)
+  } catch e {
+    try { do --> TechDetect("http://" --> domain) } catch e2 { ghost_err("TechDetect: " --> e2) }
+  }
+
+  ghost_section("HTTP Headers")
+  try { do --> Headers("https://" --> domain) } catch e { ghost_err("Headers: " --> e) }
+
+  ghost_section("Email Addresses on Site")
+  try { do --> EmailHarvest("https://" --> domain) } catch e { ghost_err("EmailHarvest: " --> e) }
+
+  ghost_section("Subdomain Enumeration")
+  try { do --> SubdomainEnum(domain) } catch e { ghost_err("SubdomainEnum: " --> e) }
+
+  ghost_section("Certificate Transparency (More Subdomains)")
+  Trace("  https://crt.sh/?q=" --> domain)
+  Trace("  https://crt.sh/?q=%25." --> domain)
+
+  ghost_section("External Intelligence Links")
+  Trace("  Shodan      : https://www.shodan.io/search?query=hostname:" --> domain)
+  Trace("  Censys      : https://search.censys.io/search?resource=hosts&q=" --> domain)
+  Trace("  URLScan     : https://urlscan.io/search/#domain:" --> domain)
+  Trace("  SecurityTrails: https://securitytrails.com/domain/" --> domain --> "/dns")
+  Trace("  VirusTotal  : https://www.virustotal.com/gui/domain/" --> domain)
+  Trace("  Wayback     : https://web.archive.org/web/*/" --> domain)
+
+  Trace("")
+}
+
+## ─── ghost_ip ────────────────────────────────────────────────────────────────
+## Full IP intelligence: geo, ASN, rDNS, ports, threat feeds.
+## Usage: ghost_ip("8.8.8.8")
+
+func ghost_ip(ip) {
+  ghost_separator("IP OSINT  >>  " --> ip)
+
+  ghost_section("Geolocation + ISP")
+  try { do --> GeoIP(ip) } catch e { ghost_err("GeoIP: " --> e) }
+
+  ghost_section("Full IP Intelligence")
+  try { do --> IPInfo(ip) } catch e { ghost_err("IPInfo: " --> e) }
+
+  ghost_section("Reverse DNS")
+  try { do --> DNSLookup(ip) } catch e { ghost_err("rDNS: " --> e) }
+
+  ghost_section("Open Ports — Top 20")
+  top = [21,22,23,25,53,80,110,143,443,445,3306,3389,5432,6379,8080,8443,8888,9200,27017,11211]
+  open_ports = []
+  each p : top {
+    try {
+      if hasPort(ip, p) {
+        open_ports = append(open_ports, p)
+        ghost_hit("OPEN  " --> str(p) --> "/tcp")
+      }
+    } catch e { }
+  }
+  if len(open_ports) == 0 { ghost_info("No common ports open or filtered") }
+
+  ghost_section("Threat Intelligence Links")
+  Trace("  Shodan     : https://www.shodan.io/host/" --> ip)
+  Trace("  Censys     : https://search.censys.io/hosts/" --> ip)
+  Trace("  GreyNoise  : https://viz.greynoise.io/ip/" --> ip)
+  Trace("  AbuseIPDB  : https://www.abuseipdb.com/check/" --> ip)
+  Trace("  VirusTotal : https://www.virustotal.com/gui/ip-address/" --> ip)
+  Trace("  ipinfo.io  : https://ipinfo.io/" --> ip)
+  Trace("  ThreatCrowd: https://www.threatcrowd.org/ip.php?ip=" --> ip)
+
+  Trace("")
+}
+
+## ─── ghost_email ─────────────────────────────────────────────────────────────
+## Email OSINT: format analysis, Gravatar, breach links, social search.
+## Usage: ghost_email("john.doe@example.com")
+
+func ghost_email(email) {
+  ghost_separator("EMAIL OSINT  >>  " --> email)
+
+  parts = split(email, "@")
+  if len(parts) != 2 {
+    ghost_err("Invalid email format")
+    return
+  }
+  username = parts[0]
+  domain   = parts[1]
+
+  ghost_section("Email Analysis")
+  ghost_info("Username : " --> username)
+  ghost_info("Domain   : " --> domain)
+  ghost_info("MD5 Hash : " --> md5(lower(email)))
+  ghost_info("SHA256   : " --> sha256(lower(email)))
+
+  ghost_section("Likely Email Format Variants")
+  name_parts = split(username, ".")
+  if len(name_parts) >= 2 {
+    first = name_parts[0]
+    last  = name_parts[len(name_parts) - 1]
+    variants = [
+      first --> "@" --> domain,
+      last  --> "@" --> domain,
+      first --> last --> "@" --> domain,
+      first --> "_" --> last --> "@" --> domain,
+      last  --> "." --> first --> "@" --> domain,
+      substr(first, 0, 1) --> last --> "@" --> domain,
+      first --> substr(last, 0, 1) --> "@" --> domain
+    ]
+    each v : variants {
+      Trace("  " --> v)
+    }
+  }
+
+  ghost_section("Gravatar Profile (Public Avatar)")
+  g_hash = md5(lower(trim(email)))
+  Trace("  Avatar : https://www.gravatar.com/avatar/" --> g_hash --> "?d=404")
+  Trace("  Profile: https://www.gravatar.com/" --> g_hash)
+
+  ghost_section("Breach Database Links")
+  Trace("  HaveIBeenPwned: https://haveibeenpwned.com/account/" --> email)
+  Trace("  DeHashed      : https://dehashed.com/search?query=" --> email)
+  Trace("  IntelligenceX : https://intelx.io/?s=" --> email)
+  Trace("  Emailrep      : https://emailrep.io/" --> email)
+  Trace("  Hunter.io     : https://hunter.io/email-verifier/" --> email)
+  Trace("  Snusbase      : https://snusbase.com")
+
+  ghost_section("Public Search Links")
+  enc_email = Encode(email, "url")
+  Trace("  Google  : https://www.google.com/search?q=\"" --> email --> "\"")
+  Trace("  GitHub  : https://github.com/search?q=" --> enc_email --> "&type=users")
+  Trace("  Pastebin: https://www.google.com/search?q=site:pastebin.com+" --> enc_email)
+
+  ghost_section("Domain Intelligence")
+  try { do --> Recon(domain) } catch e { ghost_err("Domain recon: " --> e) }
+
+  Trace("")
+}
+
+## ─── ghost_username ──────────────────────────────────────────────────────────
+## Username OSINT: check 30+ platforms via HTTP + generate search links.
+## Usage: ghost_username("johndoe")
+
+func ghost_username(username) {
+  ghost_separator("USERNAME OSINT  >>  " --> username)
+
+  ## Platform list: [display name, URL]
+  platforms = [
+    ["GitHub",        "https://github.com/" --> username],
+    ["GitLab",        "https://gitlab.com/" --> username],
+    ["Twitter/X",     "https://twitter.com/" --> username],
+    ["Instagram",     "https://instagram.com/" --> username],
+    ["Reddit",        "https://reddit.com/user/" --> username],
+    ["TikTok",        "https://tiktok.com/@" --> username],
+    ["YouTube",       "https://youtube.com/@" --> username],
+    ["LinkedIn",      "https://linkedin.com/in/" --> username],
+    ["Medium",        "https://medium.com/@" --> username],
+    ["DevTo",         "https://dev.to/" --> username],
+    ["HackerNews",    "https://news.ycombinator.com/user?id=" --> username],
+    ["ProductHunt",   "https://producthunt.com/@" --> username],
+    ["Steam",         "https://steamcommunity.com/id/" --> username],
+    ["Twitch",        "https://twitch.tv/" --> username],
+    ["Keybase",       "https://keybase.io/" --> username],
+    ["Pastebin",      "https://pastebin.com/u/" --> username],
+    ["DockerHub",     "https://hub.docker.com/u/" --> username],
+    ["PyPI",          "https://pypi.org/user/" --> username],
+    ["NPM",           "https://npmjs.com/~" --> username],
+    ["Codepen",       "https://codepen.io/" --> username],
+    ["Replit",        "https://replit.com/@" --> username],
+    ["Flickr",        "https://flickr.com/people/" --> username],
+    ["Vimeo",         "https://vimeo.com/" --> username],
+    ["Behance",       "https://behance.net/" --> username],
+    ["Dribbble",      "https://dribbble.com/" --> username],
+    ["SoundCloud",    "https://soundcloud.com/" --> username],
+    ["Gravatar",      "https://gravatar.com/" --> username],
+    ["Pinterest",     "https://pinterest.com/" --> username],
+    ["Tumblr",        "https://tumblr.com/" --> username],
+    ["Mastodon",      "https://mastodon.social/@" --> username]
+  ]
+
+  ghost_section("Checking " --> str(len(platforms)) --> " Platforms")
+
+  found   = []
+  missing = []
+
+  each platform : platforms {
+    pname = platform[0]
+    url   = platform[1]
+    try {
+      resp = http("GET", url, {"timeout": 6000, "follow": true, "agent": "Mozilla/5.0"})
+      s = httpStatus(resp)
+      if s == 200 {
+        ghost_hit("[FOUND]   " --> pname --> "  →  " --> url)
+        found = append(found, pname --> ": " --> url)
+      } elseif s == 404 {
+        ghost_info("[404]     " --> pname)
+        missing = append(missing, pname)
+      } else {
+        ghost_info("[" --> str(s) --> "]      " --> pname)
+      }
+    } catch e {
+      ghost_info("[TIMEOUT] " --> pname)
+    }
+  }
+
+  ghost_section("Results")
+  ghost_ok(str(len(found)) --> " profile(s) confirmed")
+  ghost_info(str(len(missing)) --> " not found")
+
+  if len(found) > 0 {
+    ghost_section("Confirmed Profiles")
+    each f : found {
+      Trace("  " --> f)
+    }
+  }
+
+  ghost_section("Additional Search Links")
+  enc = Encode(username, "url")
+  Trace("  Google  : https://www.google.com/search?q=\"" --> username --> "\"")
+  Trace("  Bing    : https://www.bing.com/search?q=\"" --> username --> "\"")
+  Trace("  Sherlock: https://github.com/sherlock-project/sherlock")
+
+  Trace("")
+  return found
+}
+
+## ─── ghost_social ────────────────────────────────────────────────────────────
+## Deep social OSINT — fetches public API data from GitHub, HackerNews, Reddit.
+## Usage: ghost_social("johndoe")
+
+func ghost_social(username) {
+  ghost_separator("SOCIAL DEEP OSINT  >>  " --> username)
+
+  ## GitHub public API
+  ghost_section("GitHub (Public API)")
+  try {
+    resp = http("GET", "https://api.github.com/users/" --> username, {
+      "headers": {"Accept": "application/vnd.github.v3+json"},
+      "timeout": 8000
+    })
+    if httpStatus(resp) == 200 {
+      body = httpBody(resp)
+      ghost_ok("FOUND on GitHub")
+      fields = ["name","company","location","email","bio","blog","twitter_username","public_repos","followers","following","created_at"]
+      labels = ["Name","Company","Location","Email","Bio","Website","Twitter","Public Repos","Followers","Following","Joined"]
+      i = 0
+      loop 11 {
+        val = _ghost_json(body, fields[i])
+        if val != "" && val != "null" {
+          Trace("  " --> labels[i] --> ": " --> truncate(val, 80))
+        }
+        i += 1
+      }
+      Trace("  Profile: https://github.com/" --> username)
+    } elseif httpStatus(resp) == 404 {
+      ghost_info("GitHub: not found")
+    }
+  } catch e { ghost_err("GitHub API: " --> e) }
+
+  ## HackerNews public API
+  ghost_section("HackerNews (Public API)")
+  try {
+    resp_hn = http("GET", "https://hacker-news.firebaseio.com/v0/user/" --> username --> ".json", {"timeout": 6000})
+    if httpStatus(resp_hn) == 200 {
+      body_hn = httpBody(resp_hn)
+      if body_hn != "null" && len(body_hn) > 5 {
+        ghost_ok("FOUND on HackerNews")
+        Trace("  Profile: https://news.ycombinator.com/user?id=" --> username)
+        karma = _ghost_json(body_hn, "karma")
+        if karma != "" { Trace("  Karma: " --> karma) }
+        about = _ghost_json(body_hn, "about")
+        if about != "" { Trace("  About: " --> truncate(about, 80)) }
+      } else {
+        ghost_info("HackerNews: not found")
+      }
+    }
+  } catch e { ghost_err("HackerNews API: " --> e) }
+
+  ## Reddit public API
+  ghost_section("Reddit (Public API)")
+  try {
+    resp_rd = http("GET", "https://www.reddit.com/user/" --> username --> "/about.json", {
+      "agent": "Mozilla/5.0 Ghost-OSINT/1.0",
+      "timeout": 8000
+    })
+    if httpStatus(resp_rd) == 200 {
+      body_rd = httpBody(resp_rd)
+      ghost_ok("FOUND on Reddit")
+      Trace("  Profile: https://reddit.com/u/" --> username)
+      karma = _ghost_json(body_rd, "total_karma")
+      if karma != "" { Trace("  Total karma: " --> karma) }
+      created = _ghost_json(body_rd, "created_utc")
+      if created != "" { Trace("  Account created (unix): " --> created) }
+    } elseif httpStatus(resp_rd) == 404 {
+      ghost_info("Reddit: not found")
+    }
+  } catch e { ghost_err("Reddit API: " --> e) }
+
+  Trace("")
+}
+
+## ─── ghost_phone ─────────────────────────────────────────────────────────────
+## Phone number OSINT: country detection, format variants, search links.
+## Usage: ghost_phone("+1-555-867-5309")
+
+func ghost_phone(number) {
+  ghost_separator("PHONE OSINT  >>  " --> number)
+
+  clean = replace(number, " ", "")
+  clean = replace(clean, "-", "")
+  clean = replace(clean, "(", "")
+  clean = replace(clean, ")", "")
+  clean = replace(clean, ".", "")
+  clean = replace(clean, "+", "")
+
+  ghost_section("Number Analysis")
+  ghost_info("Raw    : " --> number)
+  ghost_info("Clean  : " --> clean)
+  ghost_info("Digits : " --> str(len(clean)))
+
+  ghost_section("Country Detection")
+  country = "Unknown — check country code manually"
+  if startsWith(number, "+1")  || startsWith(number, "001")  { country = "United States / Canada" }
+  if startsWith(number, "+44") || startsWith(number, "0044") { country = "United Kingdom" }
+  if startsWith(number, "+91") || startsWith(number, "0091") { country = "India" }
+  if startsWith(number, "+49")  { country = "Germany" }
+  if startsWith(number, "+33")  { country = "France" }
+  if startsWith(number, "+86")  { country = "China" }
+  if startsWith(number, "+7")   { country = "Russia / Kazakhstan" }
+  if startsWith(number, "+55")  { country = "Brazil" }
+  if startsWith(number, "+61")  { country = "Australia" }
+  if startsWith(number, "+81")  { country = "Japan" }
+  if startsWith(number, "+82")  { country = "South Korea" }
+  if startsWith(number, "+971") { country = "UAE" }
+  if startsWith(number, "+966") { country = "Saudi Arabia" }
+  if startsWith(number, "+92")  { country = "Pakistan" }
+  if startsWith(number, "+880") { country = "Bangladesh" }
+  ghost_info("Country: " --> country)
+
+  ghost_section("Public Reverse Lookup Links")
+  Trace("  Truecaller  : https://www.truecaller.com/search/us/" --> clean)
+  Trace("  NumLookup   : https://www.numlookup.com/" --> clean)
+  Trace("  WhitePages  : https://www.whitepages.com/phone/" --> clean)
+  Trace("  CallerID    : https://calleridtest.com/lookup?number=" --> clean)
+  Trace("  Sync.me     : https://sync.me/search/?number=" --> clean)
+
+  ghost_section("Search Links")
+  Trace("  Google : https://www.google.com/search?q=\"" --> number --> "\"")
+  Trace("  Google : https://www.google.com/search?q=\"" --> clean --> "\"")
+  Trace("  Bing   : https://www.bing.com/search?q=\"" --> number --> "\"")
+
+  Trace("")
+}
+
+## ─── ghost_company ───────────────────────────────────────────────────────────
+## Company OSINT: business records, employees, job posts, dorks.
+## Usage: ghost_company("Acme Corp")
+
+func ghost_company(name) {
+  ghost_separator("COMPANY OSINT  >>  " --> name)
+  enc = Encode(name, "url")
+
+  ghost_section("Public Business Records")
+  Trace("  OpenCorporates: https://opencorporates.com/search?q=" --> enc)
+  Trace("  Crunchbase    : https://www.crunchbase.com/search/organizations/field/organizations/facet_ids/" --> enc)
+  Trace("  LinkedIn      : https://www.linkedin.com/company/" --> enc)
+  Trace("  Bloomberg     : https://www.bloomberg.com/search?query=" --> enc)
+  Trace("  SEC EDGAR     : https://efts.sec.gov/LATEST/search-index?q=" --> enc)
+  Trace("  Glassdoor     : https://www.glassdoor.com/Search/results.htm?keyword=" --> enc)
+
+  ghost_section("Employee Discovery")
+  Trace("  LinkedIn People : https://www.linkedin.com/search/results/people/?keywords=" --> enc)
+  Trace("  Hunter.io       : https://hunter.io/search/" --> enc)
+  Trace("  RocketReach     : https://rocketreach.co/search?orgName=" --> enc)
+  Trace("  SignalHire      : https://www.signalhire.com/search?search=" --> enc)
+
+  ghost_section("Job Postings (Reveals Tech Stack + Team)")
+  Trace("  Indeed    : https://www.indeed.com/jobs?q=" --> enc)
+  Trace("  LinkedIn  : https://www.linkedin.com/jobs/search/?keywords=" --> enc)
+  Trace("  Glassdoor : https://www.glassdoor.com/Jobs/" --> enc)
+  Trace("  BuiltWith : https://builtwith.com (enter company domain)")
+
+  ghost_section("Google Dorks")
+  Trace("  \"" --> name --> "\" site:linkedin.com")
+  Trace("  \"" --> name --> "\" filetype:pdf \"confidential\" OR \"internal\"")
+  Trace("  \"" --> name --> "\" \"@\" email contact")
+  Trace("  \"" --> name --> "\" inurl:careers technology stack")
+  Trace("  site:pastebin.com \"" --> name --> "\"")
+  Trace("  site:github.com \"" --> name --> "\" password OR secret OR api_key")
+
+  ghost_section("Threat Intelligence")
+  Trace("  VirusTotal : https://www.virustotal.com/gui/search/" --> enc)
+  Trace("  HIBP Domain: https://haveibeenpwned.com/DomainSearch")
+  Trace("  BreachForums: check manually for mentions")
+
+  Trace("")
+}
+
+## ─── ghost_person ────────────────────────────────────────────────────────────
+## Person OSINT: public records, professional networks, dorks.
+## Usage: ghost_person("John Doe")
+
+func ghost_person(name) {
+  ghost_separator("PERSON OSINT  >>  " --> name)
+  enc = Encode(name, "url")
+
+  ghost_section("Public People Search Engines")
+  Trace("  Spokeo       : https://www.spokeo.com/search?q=" --> enc)
+  Trace("  Whitepages   : https://www.whitepages.com/name/" --> enc)
+  Trace("  PeopleFinder : https://www.peoplefinder.com/name/" --> enc)
+  Trace("  PeekYou      : https://www.peekyou.com/" --> enc)
+  Trace("  FastPeopleSearch: https://www.fastpeoplesearch.com/name/" --> enc)
+  Trace("  TruePeopleSearch: https://www.truepeoplesearch.com/")
+
+  ghost_section("Professional Networks")
+  Trace("  LinkedIn : https://www.linkedin.com/search/results/people/?keywords=" --> enc)
+  Trace("  GitHub   : https://github.com/search?q=" --> enc --> "&type=users")
+  Trace("  Twitter  : https://twitter.com/search?q=" --> enc --> "&f=user")
+  Trace("  ResearchGate: https://www.researchgate.net/search?q=" --> enc)
+
+  ghost_section("Public Records")
+  Trace("  Court Records : https://www.courtlistener.com/?q=" --> enc)
+  Trace("  Patent Search : https://patents.google.com/?inventor=" --> enc)
+  Trace("  Scholar       : https://scholar.google.com/scholar?q=" --> enc)
+  Trace("  OpenSyllabus  : https://opensyllabus.org/search#/authors?q=" --> enc)
+
+  ghost_section("Google Dorks")
+  Trace("  \"" --> name --> "\" site:linkedin.com")
+  Trace("  \"" --> name --> "\" email OR contact OR phone")
+  Trace("  \"" --> name --> "\" resume OR CV filetype:pdf")
+  Trace("  \"" --> name --> "\" intext:\"born\" OR intext:\"age\"")
+  Trace("  \"" --> name --> "\" site:github.com OR site:twitter.com")
+
+  Trace("")
+}
+
+## ─── ghost_breach_check ──────────────────────────────────────────────────────
+## Breach check links for an email or domain.
+## Usage: ghost_breach_check("user@example.com")
+
+func ghost_breach_check(email) {
+  ghost_separator("BREACH CHECK  >>  " --> email)
+
+  parts = split(email, "@")
+  domain = ""
+  if len(parts) == 2 { domain = parts[1] }
+
+  enc = Encode(email, "url")
+
+  ghost_section("Breach Databases (Public)")
+  Trace("  HaveIBeenPwned : https://haveibeenpwned.com/account/" --> email)
+  Trace("  DeHashed       : https://dehashed.com/search?query=" --> email)
+  Trace("  IntelligenceX  : https://intelx.io/?s=" --> email)
+  Trace("  Snusbase       : https://snusbase.com")
+  Trace("  LeakCheck      : https://leakcheck.io")
+  Trace("  Emailrep       : https://emailrep.io/" --> email)
+
+  if domain != "" {
+    ghost_section("Domain Breach Check")
+    Trace("  HIBP Domain : https://haveibeenpwned.com/DomainSearch")
+    Trace("  DeHashed    : https://dehashed.com/search?query=" --> domain)
+  }
+
+  ghost_section("Paste Sites")
+  Trace("  Pastebin: https://www.google.com/search?q=site:pastebin.com+" --> enc)
+  Trace("  GitHub  : https://gist.github.com/search?q=" --> enc)
+  Trace("  Ghostbin: https://www.google.com/search?q=site:ghostbin.co+" --> enc)
+
+  Trace("")
+}
+
+## ─── ghost_dork ──────────────────────────────────────────────────────────────
+## Generate Google / Shodan / GitHub dorks for a target.
+## Usage: ghost_dork("example.com", "backup OR config")
+
+func ghost_dork(site, query) {
+  ghost_separator("DORKS  >>  " --> site)
+
+  ghost_section("Google Dorks — Copy/Paste into Google")
+  dorks = [
+    "site:" --> site --> " filetype:pdf",
+    "site:" --> site --> " filetype:xls OR filetype:xlsx OR filetype:csv",
+    "site:" --> site --> " filetype:sql OR filetype:db",
+    "site:" --> site --> " filetype:log OR filetype:txt",
+    "site:" --> site --> " filetype:env OR filetype:cfg OR filetype:conf",
+    "site:" --> site --> " inurl:admin OR inurl:login OR inurl:dashboard",
+    "site:" --> site --> " inurl:config OR inurl:backup OR inurl:.git",
+    "site:" --> site --> " \"index of\" OR \"directory listing\"",
+    "site:" --> site --> " intitle:\"admin panel\" OR intitle:\"dashboard\"",
+    "site:" --> site --> " \"" --> query --> "\""
+  ]
+
+  each d, idx : dorks {
+    Trace("  [" --> str(idx + 1) --> "] " --> d)
+  }
+
+  ghost_section("Shodan Dorks")
+  Trace("  hostname:" --> site)
+  Trace("  ssl.cert.subject.cn:" --> site)
+  Trace("  http.title:\"" --> site --> "\"")
+  Trace("  org:\"" --> site --> "\"")
+  Trace("  http.favicon.hash:<hash>  (use faviconhash.com)")
+
+  ghost_section("GitHub Dorks")
+  Trace("  \"" --> site --> "\" password OR secret OR token")
+  Trace("  \"" --> site --> "\" api_key OR api_secret OR client_secret")
+  Trace("  \"" --> site --> "\" filename:.env OR filename:config.yml")
+  Trace("  \"@" --> site --> "\" email")
+  Trace("  org:" --> site --> " language:Python OR language:Go OR language:JS")
+
+  ghost_section("LinkedIn Dorks")
+  Trace("  site:linkedin.com/in \"" --> site --> "\"")
+  Trace("  site:linkedin.com \"" --> site --> "\" engineer OR developer OR security")
+
+  Trace("")
+}
+
+## ─── ghost_timeline ──────────────────────────────────────────────────────────
+## Public historical timeline for a target.
+## Usage: ghost_timeline("example.com")
+
+func ghost_timeline(target) {
+  ghost_separator("PUBLIC TIMELINE  >>  " --> target)
+
+  ghost_section("Wayback Machine")
+  Trace("  All snapshots : https://web.archive.org/web/*/" --> target)
+  Trace("  First capture : https://web.archive.org/web/19960101000000*/" --> target)
+  Trace("  Timeline view : https://timetravel.mementoweb.org/timemap/link/" --> target)
+  Trace("  Google Cache  : https://webcache.googleusercontent.com/search?q=cache:" --> target)
+
+  ghost_section("DNS History")
+  Trace("  ViewDNS       : https://viewdns.info/iphistory/?domain=" --> target)
+  Trace("  SecurityTrails: https://securitytrails.com/domain/" --> target --> "/history/a")
+  Trace("  DNSHistory    : https://completedns.com/dns-history/#" --> target)
+
+  ghost_section("Certificate History")
+  Trace("  crt.sh        : https://crt.sh/?q=" --> target)
+  Trace("  All certs     : https://crt.sh/?q=%25." --> target)
+
+  ghost_section("News Archive")
+  enc = Encode(target, "url")
+  Trace("  Google News   : https://news.google.com/search?q=" --> enc)
+  Trace("  GDELT Project : https://gdeltproject.org")
+
+  Trace("")
+}
+
+## ─── ghost_links ─────────────────────────────────────────────────────────────
+## Scrape + categorise all links from a public page.
+## Usage: ghost_links("https://example.com")
+
+func ghost_links(url) {
+  ghost_separator("LINK EXTRACTION  >>  " --> url)
+  try {
+    resp = http("GET", url, {"timeout": 10000, "follow": true, "agent": "Mozilla/5.0"})
+    if httpStatus(resp) == 200 {
+      body   = httpBody(resp)
+      links  = extractLinks(body, url)
+      emails = extractEmails(body)
+      forms  = extractForms(body)
+      title  = extractTitle(body)
+
+      ghost_section("Page Summary")
+      ghost_info("Title  : " --> title)
+      ghost_info("Links  : " --> str(len(links)))
+      ghost_info("Emails : " --> str(len(emails)))
+      ghost_info("Forms  : " --> str(len(forms)))
+
+      if len(links) > 0 {
+        ghost_section("All Links")
+        each link : links { Trace("  " --> link) }
+      }
+
+      if len(emails) > 0 {
+        ghost_section("Emails Found")
+        each e : emails { ghost_hit(e) }
+      }
+
+      if len(forms) > 0 {
+        ghost_section("Forms Found")
+        each f : forms {
+          ghost_info("action=" --> f["action"] --> " method=" --> f["method"] --> " fields=" --> str(f["fields"]))
+        }
+      }
+    } else {
+      ghost_err("HTTP " --> str(httpStatus(resp)))
+    }
+  } catch e {
+    ghost_err("Link extraction: " --> e)
+  }
+  Trace("")
+}
+
+## ─── ghost_metadata ──────────────────────────────────────────────────────────
+## Extract all public metadata from a webpage.
+## Usage: ghost_metadata("https://example.com")
+
+func ghost_metadata(url) {
+  ghost_separator("PAGE METADATA  >>  " --> url)
+  try {
+    resp = http("GET", url, {"timeout": 10000, "follow": true, "agent": "Mozilla/5.0"})
+    if httpStatus(resp) == 200 {
+      body = httpBody(resp)
+
+      ghost_section("Page Identity")
+      ghost_info("Title       : " --> extractTitle(body))
+      ghost_info("Description : " --> extractMeta(body, "description"))
+      ghost_info("Author      : " --> extractMeta(body, "author"))
+      ghost_info("Generator   : " --> extractMeta(body, "generator"))
+      ghost_info("Keywords    : " --> extractMeta(body, "keywords"))
+      ghost_info("Robots      : " --> extractMeta(body, "robots"))
+
+      ghost_section("Open Graph Tags")
+      ghost_info("og:title    : " --> extractMeta(body, "og:title"))
+      ghost_info("og:desc     : " --> extractMeta(body, "og:description"))
+      ghost_info("og:image    : " --> extractMeta(body, "og:image"))
+      ghost_info("og:url      : " --> extractMeta(body, "og:url"))
+      ghost_info("og:site_name: " --> extractMeta(body, "og:site_name"))
+
+      ghost_section("Twitter Card")
+      ghost_info("twitter:card   : " --> extractMeta(body, "twitter:card"))
+      ghost_info("twitter:site   : " --> extractMeta(body, "twitter:site"))
+      ghost_info("twitter:creator: " --> extractMeta(body, "twitter:creator"))
+
+      ghost_section("Server Headers (Info Disclosure)")
+      ghost_info("Server       : " --> httpHeader(resp, "server"))
+      ghost_info("X-Powered-By : " --> httpHeader(resp, "x-powered-by"))
+      ghost_info("Content-Type : " --> httpHeader(resp, "content-type"))
+      ghost_info("X-Frame-Opts : " --> httpHeader(resp, "x-frame-options"))
+      ghost_info("Last-Modified: " --> httpHeader(resp, "last-modified"))
+    } else {
+      ghost_err("HTTP " --> str(httpStatus(resp)))
+    }
+  } catch e {
+    ghost_err("Metadata fetch: " --> e)
+  }
+  Trace("")
+}
+
+## ─── ghost_image_links ───────────────────────────────────────────────────────
+## Reverse image search links for a public image URL.
+## Usage: ghost_image_links("https://example.com/photo.jpg")
+
+func ghost_image_links(url) {
+  ghost_separator("REVERSE IMAGE SEARCH  >>  " --> url)
+  enc = Encode(url, "url")
+
+  ghost_section("Reverse Image Search Engines")
+  Trace("  Google Images : https://images.google.com/searchbyimage?image_url=" --> enc)
+  Trace("  TinEye        : https://tineye.com/search?url=" --> enc)
+  Trace("  Yandex Images : https://yandex.com/images/search?url=" --> enc --> "&rpt=imageview")
+  Trace("  Bing Visual   : https://www.bing.com/images/search?view=detailv2&iss=sbi&q=imgurl:" --> enc)
+
+  ghost_section("Image Metadata Check")
+  try {
+    resp = http("GET", url, {"timeout": 10000})
+    if httpStatus(resp) == 200 {
+      ghost_ok("Image accessible — " --> str(resp["length"]) --> " bytes")
+      ghost_info("Content-Type : " --> httpHeader(resp, "content-type"))
+      ghost_info("Last-Modified: " --> httpHeader(resp, "last-modified"))
+      ghost_info("Server       : " --> httpHeader(resp, "server"))
+    } else {
+      ghost_err("HTTP " --> str(httpStatus(resp)))
+    }
+  } catch e { ghost_err("Image fetch: " --> e) }
+
+  Trace("")
+}
+
+## ─── ghost_report ────────────────────────────────────────────────────────────
+## Generate HTML report from a Mission.
+## Usage: ghost_report(mission_id, "report.html")
+
+func ghost_report(mission_id, filename) {
+  try {
+    missionReport(mission_id, filename)
+    ghost_ok("HTML report → " --> filename)
+  } catch e {
+    ghost_err("Report generation failed: " --> e)
+  }
+}
+
+## ─── ghost_full ──────────────────────────────────────────────────────────────
+## All-in-one OSINT on a domain target with full Mission tracking + report.
+## Usage: report_file = ghost_full("example.com")
+
+func ghost_full(target) {
+  m = missionStart("Ghost OSINT — " --> target, target)
+
+  missionStage(m, "Domain Intelligence")
+  ghost_domain(target)
+  missionFind(m, "INFO", "Domain recon complete", "Target: " --> target)
+
+  missionStage(m, "IP Intelligence")
+  ips = []
+  try {
+    ips = resolve(target)
+    each ip : ips {
+      ghost_ip(ip)
+      missionFind(m, "INFO", "Resolved IP: " --> ip, "")
+    }
+  } catch e {
+    missionNote(m, "Could not resolve: " --> e)
+  }
+
+  missionStage(m, "Web Metadata + Links")
+  ghost_metadata("https://" --> target)
+  ghost_links("https://" --> target)
+  missionFind(m, "INFO", "Web metadata collected", "")
+
+  missionStage(m, "Timeline + History")
+  ghost_timeline(target)
+  missionNote(m, "Wayback + DNS history links generated")
+
+  missionStage(m, "Dork Generation")
+  ghost_dork(target, "password OR credentials OR config OR backup OR secret")
+  missionNote(m, "Google, Shodan, GitHub dorks generated")
+
+  missionEnd(m)
+
+  report = "ghost_report_" --> target --> "_" --> ghost_timestamp() --> ".html"
+  missionReport(m, report)
+  ghost_ok("Full OSINT report saved: " --> report)
+  return report
+}
+
+## ─── Internal helpers ─────────────────────────────────────────────────────────
+
+## Naive JSON field extractor for flat string fields.
+func _ghost_json(json_str, key) {
+  search = "\"" --> key --> "\":"
+  if !contains(json_str, search) { return "" }
+  parts = split(json_str, search)
+  if len(parts) < 2 { return "" }
+  after = trim(parts[1])
+  if startsWith(after, "\"") {
+    after = substr(after, 1, len(after))
+    end_p = split(after, "\"")
+    if len(end_p) > 0 { return end_p[0] }
+  } elseif startsWith(after, "null") {
+    return ""
+  } else {
+    end_p = split(after, ",")
+    if len(end_p) > 0 { return trim(replace(end_p[0], "}", "")) }
+  }
+  return ""
+}
+
+## ─── End of Ghost OSINT Library v1.0.0 ───────────────────────────────────────

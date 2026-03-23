@@ -1,0 +1,178 @@
+## ═══════════════════════════════════════════════════════
+##  all_normal.str — Every normal Spectator command
+##  Run: spectator run all_normal.str
+## ═══════════════════════════════════════════════════════
+
+## ── Variables ────────────────────────────────────────
+x    = 42
+let y = "hello"
+z    = true
+pi   = 3.14159
+nothing = nil
+
+## ── f-strings ────────────────────────────────────────
+Trace(f"x={x}  y={y}  z={z}  pi={pi}")
+
+## ── Concatenation ────────────────────────────────────
+msg = "Hello " --> y --> "! The answer is " --> str(x)
+Trace(msg)
+
+## ── Augmented assignment ─────────────────────────────
+x += 10
+x -= 2
+Trace("x after +=10 -=2 : " --> str(x))
+
+## ── Maps ─────────────────────────────────────────────
+person = {"name": "Alice", "age": 30, "city": "London"}
+person["job"] = "Pentester"
+person.city   = "Hyderabad"         ## dot notation
+Trace("name : " --> person.name)
+Trace("city : " --> person["city"])
+
+## ── Lists ────────────────────────────────────────────
+tools = ["nmap", "burp", "nikto"]
+tools = append(tools, "gobuster")
+Trace("tools : " --> str(tools))
+Trace("len   : " --> str(len(tools)))
+Trace("first : " --> tools[0])
+Trace("last  : " --> tools[len(tools) - 1])
+
+## ── If / elseif / else ───────────────────────────────
+score = 85
+if score >= 90 {
+  Trace("Grade: A")
+} elseif score >= 75 {
+  Trace("Grade: B")
+} elseif score >= 60 {
+  Trace("Grade: C")
+} else {
+  Trace("Grade: F")
+}
+
+## ── Loop (counted) ───────────────────────────────────
+Trace("Counted loop:")
+loop 5 {
+  Trace("  _i = " --> str(_i))
+}
+
+## ── Loop (infinite + break) ──────────────────────────
+n = 0
+loop {
+  n += 1
+  if n >= 3 { break }
+}
+Trace("Broke out at n=" --> str(n))
+
+## ── Each ─────────────────────────────────────────────
+Trace("Each over list:")
+each tool, idx : tools {
+  Trace("  [" --> str(idx) --> "] " --> tool)
+}
+
+## ── Each over map ────────────────────────────────────
+Trace("Each over map:")
+each val, key : person {
+  Trace("  " --> val --> " = " --> str(key))
+}
+
+## ── Match ────────────────────────────────────────────
+lang = "spectator"
+match lang {
+  "python"    => { Trace("Python")    }
+  "spectator" => { Trace("Spectator!") }
+  _           => { Trace("Unknown")   }
+}
+
+## ── Functions ────────────────────────────────────────
+func greet(name, title) {
+  return "Hello, " --> title --> " " --> name --> "!"
+}
+Trace(greet("Alice", "Dr."))
+
+## ── Recursion ────────────────────────────────────────
+func factorial(n) {
+  if n <= 1 { return 1 }
+  return n * factorial(n - 1)
+}
+Trace("10! = " --> str(factorial(10)))
+
+## ── Try / catch ──────────────────────────────────────
+try {
+  bad = undefined_var
+} catch e {
+  Trace("Caught: " --> e)
+}
+
+## ── Spawn (goroutine) ────────────────────────────────
+func slow_task(label) {
+  sleep(100)
+  Trace("Spawned task done: " --> label)
+}
+spawn slow_task("background")
+Trace("Main continues while task runs")
+sleep(200)
+
+## ── Import ───────────────────────────────────────────
+## #Import coffee
+## #Import ghost
+## (commented out — requires Space install)
+
+## ── # runner ─────────────────────────────────────────
+## Capture command output directly into a variable
+whoami_result = # runner<?whoami>
+Trace("whoami: " --> trim(whoami_result))
+
+## Capture another command
+echo_result = # runner<?echo Spectator runner works>
+Trace("echo  : " --> trim(echo_result))
+
+## ── HTTP engine ──────────────────────────────────────
+Trace("HTTP GET:")
+try {
+  resp = http("GET", "https://httpbin.org/get", {"timeout": 5000})
+  Trace("  status: " --> str(httpStatus(resp)))
+  Trace("  length: " --> str(resp["length"]) --> " bytes")
+} catch e {
+  Trace("  (offline) " --> e)
+}
+
+## buildQuery / parseQuery / buildURL
+q = buildQuery({"user": "admin", "role": "tester"})
+Trace("buildQuery : " --> q)
+p = parseQuery(q)
+Trace("parseQuery : user=" --> p["user"])
+u = buildURL("https://api.example.com", {"path": "/v1/scan", "query": {"target": "localhost"}})
+Trace("buildURL   : " --> u)
+
+## ── Regex ────────────────────────────────────────────
+emails = regex("[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}", "contact admin@example.com or info@test.org")
+Trace("Emails found: " --> str(emails))
+
+matched = regexMatch("^\\d{4}-\\d{2}-\\d{2}$", "2026-03-22")
+Trace("Date regex match: " --> str(matched))
+
+## ── Type conversion ──────────────────────────────────
+Trace("str(42)    : " --> str(42))
+Trace("int('7')   : " --> str(num("7")))
+Trace("float('3.14'): " --> str(num("3.14")))
+Trace("bool(1)    : " --> str(bool(1)))
+
+## ── Timestamp ────────────────────────────────────────
+Trace("timestamp  : " --> timestamp())
+Trace("now (unix) : " --> str(timestamp()))
+
+## ── IP helpers ───────────────────────────────────────
+Trace("isIP('8.8.8.8')   : " --> str(isIP("8.8.8.8")))
+Trace("isIP('notanip')   : " --> str(isIP("notanip")))
+Trace("cidrHosts sample  : " --> str(slice(cidrHosts("192.168.1.0/30"), 0, 4)))
+
+## ── Throw ────────────────────────────────────────────
+try {
+  throw("Custom error message")
+} catch e {
+  Trace("throw caught: " --> e)
+}
+
+## ── Done ─────────────────────────────────────────────
+Trace("")
+Trace("All normal commands done!")

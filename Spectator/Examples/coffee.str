@@ -1,0 +1,684 @@
+## ═══════════════════════════════════════════════════════════════════════════
+##
+##   ██████╗ ██████╗ ███████╗███████╗███████╗███████╗
+##  ██╔════╝██╔═══██╗██╔════╝██╔════╝██╔════╝██╔════╝
+##  ██║     ██║   ██║█████╗  █████╗  █████╗  █████╗
+##  ██║     ██║   ██║██╔══╝  ██╔══╝  ██╔══╝  ██╔══╝
+##  ╚██████╗╚██████╔╝██║     ██║     ███████╗███████╗
+##   ╚═════╝ ╚═════╝ ╚═╝     ╚═╝     ╚══════╝╚══════╝
+##
+##  Coffee — Premium Recon Library for Spectator
+##  Version : 1.0.0
+##  License : MIT
+##  Install : spectator space get coffee
+##  Use     : #Import coffee
+##
+## ═══════════════════════════════════════════════════════════════════════════
+
+## ─── Internal display helpers ────────────────────────────────────────────────
+
+func _coffee_line() {
+  Trace("  ─────────────────────────────────────────────────────────")
+}
+
+func _coffee_thick() {
+  Trace("  ═════════════════════════════════════════════════════════")
+}
+
+func _coffee_ok(msg) {
+  Trace("  [+]  " --> msg)
+}
+
+func _coffee_warn(msg) {
+  Trace("  [!]  " --> msg)
+}
+
+func _coffee_info(msg) {
+  Trace("  [*]  " --> msg)
+}
+
+func _coffee_hit(msg) {
+  Trace("  [>>] " --> msg)
+}
+
+func _coffee_err(msg) {
+  Trace("  [-]  ERROR: " --> msg)
+}
+
+func _coffee_section(label) {
+  Trace("")
+  Trace("  +--[ " --> label --> " ]")
+}
+
+## ─── coffee_banner ───────────────────────────────────────────────────────────
+
+func coffee_banner(tool, version) {
+  _coffee_thick()
+  Trace("  [COFFEE]  " --> tool --> "  v" --> version)
+  Trace("  Powered by Coffee Recon Library v1.0.0 for Spectator")
+  _coffee_thick()
+  _coffee_info("Started : " --> coffee_timestamp())
+  _coffee_line()
+  Trace("")
+}
+
+## ─── coffee_timestamp ────────────────────────────────────────────────────────
+
+func coffee_timestamp() {
+  return timestamp()
+}
+
+## ─── coffee_separator ────────────────────────────────────────────────────────
+
+func coffee_separator(label) {
+  Trace("")
+  Trace("  ============================================================")
+  Trace("  == " --> label)
+  Trace("  ============================================================")
+}
+
+## ─── coffee_save ─────────────────────────────────────────────────────────────
+
+func coffee_save(filename, content) {
+  ts = coffee_timestamp()
+  line = "[" --> ts --> "] " --> content --> "\n"
+  try {
+    appendFile(filename, line)
+    _coffee_ok("Saved to: " --> filename)
+  } catch e {
+    _coffee_err("Could not save to " --> filename --> " — " --> e)
+  }
+}
+
+## ─── coffee_recon ────────────────────────────────────────────────────────────
+
+func coffee_recon(target) {
+  coffee_separator("RECON  >>  " --> target)
+  try {
+    do --> Recon(target)
+  } catch e {
+    _coffee_err("Recon failed: " --> e)
+  }
+  Trace("")
+}
+
+## ─── coffee_deep_recon ───────────────────────────────────────────────────────
+
+func coffee_deep_recon(target) {
+  coffee_separator("DEEP RECON  >>  " --> target)
+
+  _coffee_section("DNS Records")
+  try {
+    do --> Recon(target)
+  } catch e {
+    _coffee_err("DNS recon failed: " --> e)
+  }
+
+  _coffee_section("WHOIS")
+  try {
+    do --> WHOIs(target)
+  } catch e {
+    _coffee_err("WHOIs failed: " --> e)
+  }
+
+  _coffee_section("GeoIP")
+  ips = []
+  try {
+    ips = resolve(target)
+  } catch e {
+    _coffee_err("resolve failed: " --> e)
+  }
+
+  if len(ips) == 0 {
+    _coffee_warn("Could not resolve " --> target)
+  } else {
+    each ip : ips {
+      _coffee_info("Geolocating " --> ip --> " ...")
+      try {
+        do --> GeoIP(ip)
+      } catch e {
+        _coffee_err("GeoIP failed for " --> ip --> ": " --> e)
+      }
+    }
+  }
+  Trace("")
+}
+
+## ─── coffee_portscan ─────────────────────────────────────────────────────────
+
+func coffee_portscan(target, start, end) {
+  coffee_separator("PORT SCAN  >>  " --> target --> "  (" --> str(start) --> "-" --> str(end) --> ")")
+  try {
+    do --> PortScan(target, start, end)
+  } catch e {
+    _coffee_err("PortScan failed: " --> e)
+  }
+  Trace("")
+}
+
+## ─── coffee_quick_ports ──────────────────────────────────────────────────────
+
+func coffee_quick_ports(target) {
+  coffee_separator("QUICK PORTS  >>  " --> target)
+  _coffee_info("Checking top 20 ports...")
+  Trace("")
+
+  top = [21, 22, 23, 25, 53, 80, 110, 135, 139, 143, 443, 445, 3306, 3389, 5432, 6379, 8080, 8443, 9200, 27017]
+  found = 0
+
+  each p : top {
+    try {
+      if hasPort(target, p) {
+        svc = _coffee_port_name(p)
+        _coffee_hit("OPEN  " --> str(p) --> "/tcp   " --> svc)
+        found += 1
+      }
+    } catch e {
+      _coffee_err("Port check failed for " --> str(p) --> ": " --> e)
+    }
+  }
+
+  Trace("")
+  if found == 0 {
+    _coffee_warn("No common ports open on " --> target)
+  } else {
+    _coffee_ok(str(found) --> " open port(s) found on " --> target)
+  }
+  Trace("")
+}
+
+## ─── _coffee_port_name ───────────────────────────────────────────────────────
+
+func _coffee_port_name(port) {
+  match str(port) {
+    "21"    => { return "FTP" }
+    "22"    => { return "SSH" }
+    "23"    => { return "Telnet" }
+    "25"    => { return "SMTP" }
+    "53"    => { return "DNS" }
+    "80"    => { return "HTTP" }
+    "110"   => { return "POP3" }
+    "135"   => { return "MSRPC" }
+    "139"   => { return "NetBIOS" }
+    "143"   => { return "IMAP" }
+    "443"   => { return "HTTPS" }
+    "445"   => { return "SMB" }
+    "3306"  => { return "MySQL" }
+    "3389"  => { return "RDP" }
+    "5432"  => { return "PostgreSQL" }
+    "6379"  => { return "Redis" }
+    "8080"  => { return "HTTP-Alt" }
+    "8443"  => { return "HTTPS-Alt" }
+    "9200"  => { return "Elasticsearch" }
+    "27017" => { return "MongoDB" }
+    _       => { return "unknown" }
+  }
+}
+
+## ─── coffee_web ──────────────────────────────────────────────────────────────
+
+func coffee_web(target) {
+  coffee_separator("WEB PROBE  >>  " --> target)
+
+  _coffee_section("HTTP Response")
+  try {
+    do --> HTTPProbe(target)
+  } catch e {
+    _coffee_err("HTTPProbe failed: " --> e)
+  }
+
+  _coffee_section("Response Headers")
+  try {
+    do --> Headers(target)
+  } catch e {
+    _coffee_err("Headers failed: " --> e)
+  }
+
+  _coffee_section("Technology Stack")
+  try {
+    do --> TechDetect(target)
+  } catch e {
+    _coffee_err("TechDetect failed: " --> e)
+  }
+
+  _coffee_section("Email Addresses")
+  try {
+    do --> EmailHarvest(target)
+  } catch e {
+    _coffee_err("EmailHarvest failed: " --> e)
+  }
+
+  Trace("")
+}
+
+## ─── coffee_ssl ──────────────────────────────────────────────────────────────
+
+func coffee_ssl(target) {
+  coffee_separator("SSL/TLS INFO  >>  " --> target)
+  try {
+    do --> SSLInfo(target)
+  } catch e {
+    _coffee_err("SSLInfo failed: " --> e)
+  }
+  Trace("")
+}
+
+## ─── coffee_subdomains ───────────────────────────────────────────────────────
+
+func coffee_subdomains(target) {
+  coffee_separator("SUBDOMAIN ENUM  >>  " --> target)
+  try {
+    do --> SubdomainEnum(target)
+  } catch e {
+    _coffee_err("SubdomainEnum failed: " --> e)
+  }
+  Trace("")
+}
+
+## ─── coffee_geoip ────────────────────────────────────────────────────────────
+
+func coffee_geoip(ip) {
+  coffee_separator("GEO IP  >>  " --> ip)
+  try {
+    do --> GeoIP(ip)
+  } catch e {
+    _coffee_err("GeoIP failed: " --> e)
+  }
+  Trace("")
+}
+
+## ─── coffee_whois ────────────────────────────────────────────────────────────
+
+func coffee_whois(domain) {
+  coffee_separator("WHOIS  >>  " --> domain)
+  try {
+    do --> WHOIs(domain)
+  } catch e {
+    _coffee_err("WHOIs failed: " --> e)
+  }
+  Trace("")
+}
+
+## ─── coffee_emails ───────────────────────────────────────────────────────────
+
+func coffee_emails(url) {
+  coffee_separator("EMAIL HARVEST  >>  " --> url)
+  try {
+    do --> EmailHarvest(url)
+  } catch e {
+    _coffee_err("EmailHarvest failed: " --> e)
+  }
+  Trace("")
+}
+
+## ─── coffee_tech ─────────────────────────────────────────────────────────────
+
+func coffee_tech(url) {
+  coffee_separator("TECH DETECT  >>  " --> url)
+  try {
+    do --> TechDetect(url)
+  } catch e {
+    _coffee_err("TechDetect failed: " --> e)
+  }
+  Trace("")
+}
+
+## ─── coffee_dirbust ──────────────────────────────────────────────────────────
+
+func coffee_dirbust(url) {
+  coffee_separator("DIR BUST  >>  " --> url)
+  try {
+    do --> DirBust(url)
+  } catch e {
+    _coffee_err("DirBust failed: " --> e)
+  }
+  Trace("")
+}
+
+## ─── coffee_sqli ─────────────────────────────────────────────────────────────
+
+func coffee_sqli(url) {
+  coffee_separator("SQLI TEST  >>  " --> url)
+  try {
+    do --> SQLiTest(url)
+  } catch e {
+    _coffee_err("SQLiTest failed: " --> e)
+  }
+  Trace("")
+}
+
+## ─── coffee_fuzz ─────────────────────────────────────────────────────────────
+
+func coffee_fuzz(url, wordlist) {
+  coffee_separator("URL FUZZ  >>  " --> url)
+  try {
+    if len(wordlist) == 0 {
+      _coffee_info("Using built-in wordlist")
+      builtin = ["admin","login","dashboard","config","backup","uploads","api","v1","v2","test","dev",".git","wp-admin","phpinfo.php","robots.txt","sitemap.xml",".env","config.php","database.php","secret","private","data","dump","db","sql","logs","tmp","cache","old","bak"]
+      do --> FuzzURL(url, builtin)
+    } else {
+      _coffee_info("Using custom wordlist (" --> str(len(wordlist)) --> " paths)")
+      do --> FuzzURL(url, wordlist)
+    }
+  } catch e {
+    _coffee_err("FuzzURL failed: " --> e)
+  }
+  Trace("")
+}
+
+## ─── coffee_cidr ─────────────────────────────────────────────────────────────
+
+func coffee_cidr(cidr) {
+  coffee_separator("CIDR SCAN  >>  " --> cidr)
+
+  _coffee_section("Port 80 (HTTP)")
+  try {
+    do --> CIDRScan(cidr, 80)
+  } catch e {
+    _coffee_err("CIDRScan port 80 failed: " --> e)
+  }
+
+  _coffee_section("Port 443 (HTTPS)")
+  try {
+    do --> CIDRScan(cidr, 443)
+  } catch e {
+    _coffee_err("CIDRScan port 443 failed: " --> e)
+  }
+
+  _coffee_section("Port 22 (SSH)")
+  try {
+    do --> CIDRScan(cidr, 22)
+  } catch e {
+    _coffee_err("CIDRScan port 22 failed: " --> e)
+  }
+
+  _coffee_section("Port 445 (SMB)")
+  try {
+    do --> CIDRScan(cidr, 445)
+  } catch e {
+    _coffee_err("CIDRScan port 445 failed: " --> e)
+  }
+
+  Trace("")
+}
+
+## ─── coffee_ping_sweep ───────────────────────────────────────────────────────
+
+func coffee_ping_sweep(hosts) {
+  coffee_separator("PING SWEEP  >>  " --> str(len(hosts)) --> " hosts")
+  alive = []
+
+  each host : hosts {
+    try {
+      up = hasPort(host, 80) || hasPort(host, 22) || hasPort(host, 443) || hasPort(host, 445)
+      if up {
+        _coffee_hit("UP    " --> host)
+        alive = append(alive, host)
+      } else {
+        _coffee_info("DOWN  " --> host)
+      }
+    } catch e {
+      _coffee_err("Ping check failed for " --> host --> ": " --> e)
+    }
+  }
+
+  Trace("")
+  _coffee_ok(str(len(alive)) --> " host(s) responding out of " --> str(len(hosts)))
+  Trace("")
+  return alive
+}
+
+## ─── coffee_concurrent ───────────────────────────────────────────────────────
+
+func coffee_concurrent(hosts, port) {
+  coffee_separator("CONCURRENT SCAN  >>  port " --> str(port))
+  try {
+    do --> ConcurrentScan(hosts, port)
+  } catch e {
+    _coffee_err("ConcurrentScan failed: " --> e)
+  }
+  Trace("")
+}
+
+## ─── coffee_hash_all ─────────────────────────────────────────────────────────
+
+func coffee_hash_all(data) {
+  coffee_separator("HASH ANALYSIS")
+  _coffee_info("Input  : " --> data)
+  _coffee_info("Length : " --> str(len(data)) --> " characters")
+  Trace("")
+  Trace("  MD5    : " --> md5(data))
+  Trace("  SHA1   : " --> sha1(data))
+  Trace("  SHA256 : " --> sha256(data))
+  Trace("  Base64 : " --> base64enc(data))
+  Trace("")
+}
+
+## ─── coffee_banner_grab_multi ────────────────────────────────────────────────
+
+func coffee_banner_grab_multi(host, ports) {
+  coffee_separator("BANNER GRAB  >>  " --> host)
+  each p : ports {
+    try {
+      if hasPort(host, p) {
+        _coffee_info("Grabbing port " --> str(p) --> " ...")
+        do --> BannerGrab(host, p)
+      } else {
+        _coffee_info("Port " --> str(p) --> " closed — skipping.")
+      }
+    } catch e {
+      _coffee_err("BannerGrab port " --> str(p) --> " failed: " --> e)
+    }
+  }
+  Trace("")
+}
+
+## ─── coffee_dns_deep ─────────────────────────────────────────────────────────
+
+func coffee_dns_deep(domain) {
+  coffee_separator("DEEP DNS  >>  " --> domain)
+
+  _coffee_section("A / AAAA Records")
+  try {
+    do --> DNSLookup(domain)
+  } catch e {
+    _coffee_err("DNSLookup failed: " --> e)
+  }
+
+  _coffee_section("Full Record Set")
+  try {
+    do --> Recon(domain)
+  } catch e {
+    _coffee_err("Recon failed: " --> e)
+  }
+
+  Trace("")
+}
+
+## ─── coffee_http_methods ─────────────────────────────────────────────────────
+
+func coffee_http_methods(url) {
+  coffee_separator("HTTP METHODS  >>  " --> url)
+  _coffee_info("Probing HTTP response...")
+  Trace("")
+  try {
+    code = httpGet(url)
+    Trace("  GET     ->  " --> str(code))
+  } catch e {
+    _coffee_err("HTTP probe failed: " --> e)
+  }
+  Trace("")
+}
+
+## ─── coffee_score ────────────────────────────────────────────────────────────
+
+func coffee_score(target) {
+  coffee_separator("ATTACK SURFACE SCORE  >>  " --> target)
+
+  points = 0
+  findings = []
+
+  ips = []
+  try {
+    ips = resolve(target)
+  } catch e {
+    _coffee_warn("Could not resolve " --> target)
+  }
+
+  if len(ips) == 0 {
+    _coffee_warn("No IPs resolved — using target directly.")
+    ips = append(ips, target)
+  } else {
+    _coffee_info("Resolved: " --> ips[0])
+  }
+
+  ## Check each port safely
+  try {
+    if hasPort(target, 80) {
+      points += 1
+      findings = append(findings, "HTTP (80) exposed")
+    }
+  } catch e { }
+  try {
+    if hasPort(target, 443) {
+      points += 1
+      findings = append(findings, "HTTPS (443) exposed")
+    }
+  } catch e { }
+  try {
+    if hasPort(target, 22) {
+      points += 2
+      findings = append(findings, "SSH (22) — brute-force risk")
+    }
+  } catch e { }
+  try {
+    if hasPort(target, 3389) {
+      points += 3
+      findings = append(findings, "RDP (3389) — critical exposure!")
+    }
+  } catch e { }
+  try {
+    if hasPort(target, 445) {
+      points += 3
+      findings = append(findings, "SMB (445) — lateral movement risk")
+    }
+  } catch e { }
+  try {
+    if hasPort(target, 23) {
+      points += 4
+      findings = append(findings, "Telnet (23) — plaintext protocol!")
+    }
+  } catch e { }
+  try {
+    if hasPort(target, 3306) {
+      points += 4
+      findings = append(findings, "MySQL (3306) publicly accessible!")
+    }
+  } catch e { }
+  try {
+    if hasPort(target, 5432) {
+      points += 4
+      findings = append(findings, "PostgreSQL (5432) publicly accessible!")
+    }
+  } catch e { }
+  try {
+    if hasPort(target, 6379) {
+      points += 5
+      findings = append(findings, "Redis (6379) — often unauthenticated!")
+    }
+  } catch e { }
+  try {
+    if hasPort(target, 27017) {
+      points += 5
+      findings = append(findings, "MongoDB (27017) — often unauthenticated!")
+    }
+  } catch e { }
+  try {
+    if hasPort(target, 9200) {
+      points += 4
+      findings = append(findings, "Elasticsearch (9200) exposed!")
+    }
+  } catch e { }
+  try {
+    status = httpGet("http://" --> target)
+    if status == 200 {
+      points += 1
+      findings = append(findings, "HTTP returns 200 OK — active web service")
+    }
+  } catch e { }
+
+  _coffee_section("Findings")
+  if len(findings) == 0 {
+    _coffee_ok("No significant exposure detected.")
+  } else {
+    n = 1
+    each f : findings {
+      Trace("  [" --> str(n) --> "] " --> f)
+      n += 1
+    }
+  }
+
+  level = "LOW"
+  if points >= 3  { level = "MEDIUM" }
+  if points >= 7  { level = "HIGH" }
+  if points >= 12 { level = "CRITICAL" }
+
+  Trace("")
+  _coffee_section("Risk Score")
+  Trace("  Points : " --> str(points))
+  Trace("  Level  : " --> level)
+  Trace("")
+
+  if level == "CRITICAL" {
+    _coffee_warn("CRITICAL exposure — multiple high-risk services found!")
+  } elseif level == "HIGH" {
+    _coffee_warn("HIGH risk — significant attack surface present.")
+  } elseif level == "MEDIUM" {
+    _coffee_info("MEDIUM risk — some exposure detected.")
+  } else {
+    _coffee_ok("LOW risk — minimal public exposure.")
+  }
+
+  Trace("")
+  return level
+}
+
+## ─── coffee_full ─────────────────────────────────────────────────────────────
+
+func coffee_full(target) {
+  _coffee_thick()
+  Trace("  [COFFEE] FULL RECON  >>  " --> target)
+  _coffee_thick()
+  Trace("")
+
+  _coffee_info("Phase 1/7 — Attack surface score")
+  risk = coffee_score(target)
+
+  _coffee_info("Phase 2/7 — Deep DNS + WHOIS + GeoIP")
+  coffee_deep_recon(target)
+
+  _coffee_info("Phase 3/7 — Quick port scan")
+  coffee_quick_ports(target)
+
+  _coffee_info("Phase 4/7 — SSL certificate")
+  coffee_ssl(target)
+
+  _coffee_info("Phase 5/7 — Subdomain enumeration")
+  coffee_subdomains(target)
+
+  _coffee_info("Phase 6/7 — Web probe")
+  coffee_web("http://" --> target)
+
+  _coffee_info("Phase 7/7 — Directory discovery")
+  coffee_dirbust("http://" --> target)
+
+  _coffee_thick()
+  Trace("  [COFFEE] FULL RECON COMPLETE")
+  Trace("  Target    : " --> target)
+  Trace("  Risk Level: " --> risk)
+  Trace("  Timestamp : " --> coffee_timestamp())
+  _coffee_thick()
+  Trace("")
+}
+
+## ─── End of Coffee Library v1.0.0 ────────────────────────────────────────────
