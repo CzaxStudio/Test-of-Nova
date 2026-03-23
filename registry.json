@@ -5,9 +5,10 @@
     "author": "CzaxStudio",
     "license": "MIT",
     "description": "Premium all-in-one recon library — DNS, ports, web, CIDR, scoring and more.",
-    "source": "https://raw.githubusercontent.com/CzaxStudio/Spectator/refs/heads/main/Coffee.str",
+    "source": "https://raw.githubusercontent.com/CzaxStudio/Spectator/refs/heads/main/Coffee",
     "github": "https://github.com/CzaxStudio/Spectator",
     "keywords": ["recon", "dns", "portscan", "web", "osint", "pentest"],
+    "sha256": "",
     "registered_at": "2026-03-20"
   },
   "ghost": {
@@ -16,9 +17,10 @@
     "author": "CzaxStudio",
     "license": "MIT",
     "description": "Professional OSINT library — domain, IP, email, username, person, company intelligence.",
-    "source": "https://raw.githubusercontent.com/CzaxStudio/Spectator/refs/heads/main/Ghost.str",
+    "source": "https://raw.githubusercontent.com/CzaxStudio/Spectator/refs/heads/main/Ghost",
     "github": "https://github.com/CzaxStudio/Spectator",
     "keywords": ["osint", "recon", "email", "username", "domain", "ip", "investigation"],
+    "sha256": "",
     "registered_at": "2026-03-21"
   }
 }
