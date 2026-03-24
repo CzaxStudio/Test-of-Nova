@@ -14,6 +14,8 @@
 A cybersecurity scripting language built for pentesters, red teamers, and security researchers.
 Write recon scripts, build GUI tools, automate assessments — all in one clean language.
 
+Feature of making GUI tools is available only for Windows for now. (CLI and TUI is for both, Mac and Linux)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-00d4aa.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-2.0.0-00d4aa.svg)](releases)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-00d4aa.svg)](releases)
