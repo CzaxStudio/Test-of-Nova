@@ -1,0 +1,16 @@
+## Ghost OSINT — Full Investigation with HTML Report
+#Import ghost
+
+ghost_banner("Ghost Full OSINT", "1.0")
+
+target = Capture("Target domain or IP: ")
+report = ghost_full(target)
+
+Trace("")
+Trace("  ============================================================")
+Trace("  OSINT COMPLETE")
+Trace("  Target  : " --> target)
+Trace("  Report  : " --> report)
+Trace("  Open the .html file in any browser.")
+Trace("  ============================================================")
+## Hello

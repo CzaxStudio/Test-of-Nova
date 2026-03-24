@@ -1,0 +1,364 @@
+## ═══════════════════════════════════════════════════════════════
+##  Spectator GUI Demo — Terminal Dashboard
+##  Simulates a GUI using Spectator's built-in display tools.
+##  Run: spectator run gui_demo.str
+## ═══════════════════════════════════════════════════════════════
+
+## ── Helper: clear screen ─────────────────────────────────────
+func clear_screen() {
+  Trace("\033[2J\033[H")
+}
+
+## ── Helper: draw a box with a title ──────────────────────────
+func draw_box(title, width) {
+  line = repeat("─", width - 4)
+  Trace("  ┌─ " --> title --> " " --> line --> "┐")
+}
+
+func draw_box_bottom(width) {
+  line = repeat("─", width - 2)
+  Trace("  └" --> line --> "┘")
+}
+
+func draw_row(label, value, width) {
+  content = "  │  " --> label --> ": " --> value
+  Trace(content)
+}
+
+func draw_divider(width) {
+  line = repeat("─", width - 2)
+  Trace("  ├" --> line --> "┤")
+}
+
+## ── Main Menu Screen ─────────────────────────────────────────
+func show_menu() {
+  clear_screen()
+  Trace("")
+  Trace("  ╔══════════════════════════════════════════════════╗")
+  Trace("  ║                                                  ║")
+  Trace("  ║   ███████╗██████╗ ███████╗ ██████╗████████╗     ║")
+  Trace("  ║   ██╔════╝██╔══██╗██╔════╝██╔════╝╚══██╔══╝     ║")
+  Trace("  ║   ███████╗██████╔╝█████╗  ██║        ██║        ║")
+  Trace("  ║   ╚════██║██╔═══╝ ██╔══╝  ██║        ██║        ║")
+  Trace("  ║   ███████║██║     ███████╗╚██████╗   ██║        ║")
+  Trace("  ║   ╚══════╝╚═╝     ╚══════╝ ╚═════╝   ╚═╝        ║")
+  Trace("  ║                                                  ║")
+  Trace("  ║        Cybersecurity Scripting Language          ║")
+  Trace("  ╚══════════════════════════════════════════════════╝")
+  Trace("")
+  Trace("  ┌──────────────────────────────────────────────────┐")
+  Trace("  │  MAIN MENU                                       │")
+  Trace("  ├──────────────────────────────────────────────────┤")
+  Trace("  │                                                  │")
+  Trace("  │   [1]  Quick Recon          [4]  Hash Tools      │")
+  Trace("  │   [2]  Port Scanner         [5]  Encode/Decode   │")
+  Trace("  │   [3]  OSINT Lookup         [6]  System Info     │")
+  Trace("  │                             [7]  About           │")
+  Trace("  │                             [0]  Exit            │")
+  Trace("  │                                                  │")
+  Trace("  └──────────────────────────────────────────────────┘")
+  Trace("")
+}
+
+## ── Screen: Quick Recon ──────────────────────────────────────
+func screen_recon() {
+  clear_screen()
+  Trace("")
+  Trace("  ┌─────────────────────────────────────────────────┐")
+  Trace("  │  QUICK RECON                                    │")
+  Trace("  └─────────────────────────────────────────────────┘")
+  Trace("")
+
+  target = Capture("  Target (domain or IP): ")
+  if target == "" {
+    Trace("  No target entered.")
+    return
+  }
+
+  Trace("")
+  Trace("  Running recon on: " --> target)
+  Trace("  " --> repeat("─", 45))
+
+  ## DNS
+  Trace("")
+  Trace("  [DNS]")
+  try {
+    ips = resolve(target)
+    if len(ips) == 0 {
+      Trace("    Could not resolve")
+    } else {
+      each ip : ips {
+        Trace("    A Record: " --> ip)
+      }
+    }
+  } catch e {
+    Trace("    DNS failed: " --> e)
+  }
+
+  ## Ports
+  Trace("")
+  Trace("  [TOP PORTS]")
+  top = [80, 443, 22, 21, 3306, 3389, 8080, 8443]
+  open_count = 0
+  each p : top {
+    try {
+      if hasPort(target, p) {
+        Trace("    OPEN  " --> str(p))
+        open_count += 1
+      }
+    } catch e { }
+  }
+  if open_count == 0 {
+    Trace("    No common ports open")
+  }
+
+  ## SSL
+  Trace("")
+  Trace("  [SSL]")
+  try {
+    do --> SSLInfo(target)
+  } catch e {
+    Trace("    SSL check failed: " --> e)
+  }
+
+  Trace("")
+  Trace("  " --> repeat("─", 45))
+  Trace("  Recon complete.")
+}
+
+## ── Screen: Port Scanner ─────────────────────────────────────
+func screen_portscan() {
+  clear_screen()
+  Trace("")
+  Trace("  ┌─────────────────────────────────────────────────┐")
+  Trace("  │  PORT SCANNER                                   │")
+  Trace("  └─────────────────────────────────────────────────┘")
+  Trace("")
+
+  target    = Capture("  Target host    : ")
+  start_str = Capture("  Start port     : ")
+  end_str   = Capture("  End port       : ")
+
+  if target == "" {
+    Trace("  No target entered.")
+    return
+  }
+
+  start_port = 1
+  end_port   = 1024
+  try { start_port = int(start_str) } catch e { }
+  try { end_port   = int(end_str)   } catch e { }
+
+  Trace("")
+  Trace("  Scanning " --> target --> " ports " --> str(start_port) --> "-" --> str(end_port) --> "...")
+  Trace("  " --> repeat("─", 45))
+  Trace("")
+
+  try {
+    do --> PortScan(target, start_port, end_port)
+  } catch e {
+    Trace("  Scan error: " --> e)
+  }
+
+  Trace("")
+  Trace("  Scan complete.")
+}
+
+## ── Screen: OSINT ────────────────────────────────────────────
+func screen_osint() {
+  clear_screen()
+  Trace("")
+  Trace("  ┌─────────────────────────────────────────────────┐")
+  Trace("  │  OSINT LOOKUP                                   │")
+  Trace("  ├─────────────────────────────────────────────────┤")
+  Trace("  │  [1] Domain    [2] IP    [3] Email    [4] Back  │")
+  Trace("  └─────────────────────────────────────────────────┘")
+  Trace("")
+
+  choice = Capture("  Choose: ")
+
+  match choice {
+    "1" => {
+      domain = Capture("  Domain: ")
+      Trace("")
+      try { do --> Recon(domain) }   catch e { Trace("  DNS error: "   --> e) }
+      try { do --> WHOIs(domain) }   catch e { Trace("  WHOIS error: " --> e) }
+      try { do --> SubdomainEnum(domain) } catch e { Trace("  Subdomain error: " --> e) }
+    }
+    "2" => {
+      ip = Capture("  IP address: ")
+      Trace("")
+      try { do --> GeoIP(ip) }       catch e { Trace("  GeoIP error: " --> e) }
+      try { do --> IPInfo(ip) }      catch e { Trace("  IPInfo error: " --> e) }
+    }
+    "3" => {
+      email = Capture("  Email: ")
+      Trace("")
+      parts = split(email, "@")
+      if len(parts) == 2 {
+        Trace("  Username : " --> parts[0])
+        Trace("  Domain   : " --> parts[1])
+        Trace("  MD5 Hash : " --> md5(lower(email)))
+        Trace("  Gravatar : https://gravatar.com/avatar/" --> md5(lower(email)))
+        Trace("  HIBP     : https://haveibeenpwned.com/account/" --> email)
+      } else {
+        Trace("  Invalid email format.")
+      }
+    }
+    _ => { }
+  }
+
+  Trace("")
+}
+
+## ── Screen: Hash Tools ───────────────────────────────────────
+func screen_hash() {
+  clear_screen()
+  Trace("")
+  Trace("  ┌─────────────────────────────────────────────────┐")
+  Trace("  │  HASH TOOLS                                     │")
+  Trace("  ├─────────────────────────────────────────────────┤")
+  Trace("  │  [1] Hash text   [2] Identify hash   [3] Crack  │")
+  Trace("  └─────────────────────────────────────────────────┘")
+  Trace("")
+
+  choice = Capture("  Choose: ")
+
+  match choice {
+    "1" => {
+      text = Capture("  Text to hash: ")
+      Trace("")
+      Trace("  MD5    : " --> md5(text))
+      Trace("  SHA1   : " --> sha1(text))
+      Trace("  SHA256 : " --> sha256(text))
+      Trace("  Base64 : " --> base64enc(text))
+    }
+    "2" => {
+      hash = Capture("  Hash value: ")
+      Trace("")
+      do --> HashIdentify(hash)
+    }
+    "3" => {
+      hash = Capture("  Hash to crack: ")
+      Trace("")
+      do --> Crack(hash)
+    }
+    _ => { }
+  }
+
+  Trace("")
+}
+
+## ── Screen: Encode / Decode ──────────────────────────────────
+func screen_encode() {
+  clear_screen()
+  Trace("")
+  Trace("  ┌─────────────────────────────────────────────────┐")
+  Trace("  │  ENCODE / DECODE                                │")
+  Trace("  ├─────────────────────────────────────────────────┤")
+  Trace("  │  Schemes: url  b64  html  hex  unicode  rot13   │")
+  Trace("  └─────────────────────────────────────────────────┘")
+  Trace("")
+
+  mode   = Capture("  Mode (encode/decode): ")
+  text   = Capture("  Text               : ")
+  scheme = Capture("  Scheme             : ")
+
+  Trace("")
+  try {
+    if mode == "encode" {
+      result = Encode(text, scheme)
+      Trace("  Result: " --> result)
+    } elseif mode == "decode" {
+      result = Decode(text, scheme)
+      Trace("  Result: " --> result)
+    } else {
+      Trace("  Unknown mode. Use 'encode' or 'decode'.")
+    }
+  } catch e {
+    Trace("  Error: " --> e)
+  }
+
+  Trace("")
+}
+
+## ── Screen: System Info ──────────────────────────────────────
+func screen_sysinfo() {
+  clear_screen()
+  Trace("")
+  Trace("  ┌─────────────────────────────────────────────────┐")
+  Trace("  │  SYSTEM INFO                                    │")
+  Trace("  └─────────────────────────────────────────────────┘")
+  Trace("")
+
+  do --> OSInfo()
+
+  Trace("")
+  Trace("  ─── Environment ───────────────────────────────────")
+  Trace("  Time     : " --> timestamp())
+  Trace("  Platform : Spectator v2.0")
+
+  Trace("")
+}
+
+## ── Screen: About ────────────────────────────────────────────
+func screen_about() {
+  clear_screen()
+  Trace("")
+  Trace("  ┌─────────────────────────────────────────────────┐")
+  Trace("  │  ABOUT SPECTATOR                                │")
+  Trace("  └─────────────────────────────────────────────────┘")
+  Trace("")
+  Trace("  Version  : 2.0.0")
+  Trace("  Language : Spectator (.str)")
+  Trace("  Purpose  : Cybersecurity scripting")
+  Trace("  Author   : CzaxStudio")
+  Trace("  Repo     : github.com/CzaxStudio/Spectator")
+  Trace("")
+  Trace("  Libraries available:")
+  Trace("    Coffee — Recon library")
+  Trace("    Ghost  — OSINT library")
+  Trace("")
+  Trace("  Install a library:")
+  Trace("    spectator space get coffee")
+  Trace("    spectator space get ghost")
+  Trace("")
+  Trace("  Use in script:")
+  Trace("    #Import coffee")
+  Trace("    coffee_full(\"target.com\")")
+  Trace("")
+}
+
+## ═══════════════════════════════════════════════════════════
+##  MAIN LOOP — The "GUI" event loop
+## ═══════════════════════════════════════════════════════════
+
+running = true
+
+loop {
+  show_menu()
+  choice = Capture("  > ")
+
+  match choice {
+    "1" => { screen_recon()    }
+    "2" => { screen_portscan() }
+    "3" => { screen_osint()    }
+    "4" => { screen_hash()     }
+    "5" => { screen_encode()   }
+    "6" => { screen_sysinfo()  }
+    "7" => { screen_about()    }
+    "0" => {
+      clear_screen()
+      Trace("")
+      Trace("  Goodbye. Stay safe.")
+      Trace("")
+      break
+    }
+    _ => {
+      Trace("  Invalid option.")
+      sleep(800)
+    }
+  }
+
+  _pause = Capture("  Press Enter to continue...")
+}

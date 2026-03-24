@@ -1,0 +1,36 @@
+## ─────────────────────────────────────────────────────────────────────────────
+##  Coffee Library — Network & Infrastructure Recon
+##  Run: spectator run example_network.str
+## ─────────────────────────────────────────────────────────────────────────────
+
+#Import coffee
+
+Coffee_banner("Network Recon", "1.0")
+
+## Scan a subnet
+cidr = Capture("Enter CIDR range (e.g. 192.168.1.0/24): ")
+coffee_cidr(cidr)
+
+## Ping sweep across a custom host list
+Trace("")
+Trace("  ─── Custom host sweep ───")
+hosts = ["192.168.1.1", "192.168.1.2", "192.168.1.254", "10.0.0.1"]
+alive = coffee_ping_sweep(hosts)
+
+## Port scan all alive hosts
+if len(alive) > 0 {
+  Trace("")
+  Trace("  ─── Scanning alive hosts ───")
+  each host : alive {
+    coffee_quick_ports(host)
+  }
+}
+
+## Concurrent port check
+Trace("")
+coffee_concurrent(hosts, 22)
+coffee_concurrent(hosts, 80)
+coffee_concurrent(hosts, 443)
+
+Trace(" Network recon complete!")
+

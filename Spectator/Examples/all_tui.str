@@ -1,0 +1,236 @@
+## ═══════════════════════════════════════════════════════
+##  all_tui.str — Every TUI / terminal display command
+##  Run: spectator run all_tui.str
+##  (No GUI library needed — pure terminal)
+## ═══════════════════════════════════════════════════════
+
+## ── 1. Banner ────────────────────────────────────────
+banner("ALL TUI COMMANDS DEMO")
+
+## ── 2. Colored output ────────────────────────────────
+Trace(colorize("This is RED",     "red"))
+Trace(colorize("This is GREEN",   "green"))
+Trace(colorize("This is CYAN",    "cyan"))
+Trace(colorize("This is YELLOW",  "yellow"))
+Trace(colorize("This is MAGENTA", "magenta"))
+Trace(colorize("This is BOLD",    "bold"))
+Trace(colorize("This is DIM",     "dim"))
+
+## ── 3. Section separator ─────────────────────────────
+func ghost_separator(label) {
+  Trace("")
+  Trace("  ╔══════════════════════════════════╗")
+  Trace("  ║  " --> label)
+  Trace("  ╚══════════════════════════════════╝")
+}
+ghost_separator("SECTION HEADER")
+
+## ── 4. ASCII table ───────────────────────────────────
+Trace("")
+table(
+  ["Command",    "Type",     "Status"],
+  [
+    ["banner",   "Display",  "OK"],
+    ["table",    "Display",  "OK"],
+    ["progress", "Display",  "OK"],
+    ["colorize", "Color",    "OK"],
+    ["tally",    "Pipeline", "OK"],
+    ["sortList", "Pipeline", "OK"]
+  ]
+)
+
+## ── 5. Progress bar ──────────────────────────────────
+Trace("")
+Trace("  Progress bar:")
+loop 10 {
+  progress(_i + 1, 10, "loading...")
+  sleep(60)
+}
+
+## ── 6. Pipeline utilities ────────────────────────────
+Trace("")
+banner("PIPELINE UTILITIES")
+
+words = ["HIGH","MEDIUM","HIGH","CRITICAL","LOW","HIGH","MEDIUM","CRITICAL"]
+Trace("Input     : " --> str(words))
+Trace("tally     : " --> str(tally(words)))
+Trace("sortList  : " --> str(sortList(words)))
+
+l1 = ["nmap","burp","nikto","gobuster","sqlmap"]
+l2 = ["burp","nikto","hydra"]
+Trace("diff      : " --> str(diff(l1, l2)))
+Trace("intersect : " --> str(intersect(l1, l2)))
+
+nested = [["a","b"],["c","d"],["e"]]
+Trace("gather    : " --> str(gather(nested)))
+
+Trace("truncate  : " --> truncate("This is a long string that needs cutting", 25))
+Trace("pad       : " --> "[" --> pad("hello", 20) --> "]")
+
+## ── 7. Capture (interactive input) ──────────────────
+Trace("")
+banner("INTERACTIVE INPUT")
+## Capture() reads from stdin — uncomment to use interactively:
+## name = Capture("Your name: ")
+## For demo, use hardcoded value:
+name = "Hacker"
+Trace("  Hello, " --> name --> "!")
+Trace("  (Use Capture(\"prompt\") to read from user at runtime)")
+
+## ── 8. Hashing ───────────────────────────────────────
+Trace("")
+banner("HASHING")
+data = "spectator"
+Trace("  Input  : " --> data)
+Trace("  MD5    : " --> md5(data))
+Trace("  SHA1   : " --> sha1(data))
+Trace("  SHA256 : " --> sha256(data))
+Trace("  Base64 : " --> base64enc(data))
+
+## ── 9. Encoding ──────────────────────────────────────
+Trace("")
+banner("ENCODING")
+payload = "' OR 1=1--"
+Trace("  URL     : " --> Encode(payload, "url"))
+Trace("  Base64  : " --> Encode(payload, "b64"))
+Trace("  HTML    : " --> Encode(payload, "html"))
+Trace("  Decoded : " --> Decode(Encode(payload, "url"), "url"))
+
+## ── 10. CipherSolve ──────────────────────────────────
+Trace("")
+banner("CIPHERSOLVE")
+do --> CipherSolve("Uryyb Jbeyq")
+do --> CipherSolve("SGVsbG8gV29ybGQ=")
+
+## ── 11. HashIdentify ─────────────────────────────────
+Trace("")
+banner("HASH IDENTIFY + CRACK")
+do --> HashIdentify("5f4dcc3b5aa765d61d8327deb882cf99")
+do --> Crack("5f4dcc3b5aa765d61d8327deb882cf99", "md5")
+
+## ── 12. Secret scan ──────────────────────────────────
+Trace("")
+banner("SECRET SCAN")
+sample = "API_KEY=AIzaSyD8xK9mN2pQ3rS4tU5vW6xY7z\nAWS_KEY=AKIAIOSFODNN7EXAMPLE"
+do --> SecretScan(sample)
+
+## ── 13. Payload generator ────────────────────────────
+Trace("")
+banner("PAYLOAD GENERATOR (XSS)")
+do --> PayloadGen("xss")
+
+## ── 14. Wordlists ────────────────────────────────────
+Trace("")
+banner("BUILT-IN WORDLISTS")
+admin  = wordlist("admin_paths")
+Trace("  admin_paths     : " --> str(len(admin))  --> " entries")
+files  = wordlist("sensitive_files")
+Trace("  sensitive_files : " --> str(len(files))  --> " entries")
+subs   = wordlist("common_subdomains")
+Trace("  subdomains      : " --> str(len(subs))   --> " entries")
+
+## ── 15. Port services ────────────────────────────────
+Trace("")
+banner("PORT SERVICES MAP")
+svcs = portServices()
+ports = ["22", "80", "443", "3306", "3389", "6379", "27017"]
+each p : ports {
+  Trace("  Port " --> p --> "  →  " --> svcs[p])
+}
+
+## ── 16. Mission engine ───────────────────────────────
+Trace("")
+banner("MISSION ENGINE")
+m = missionStart("TUI Demo Mission", "example.com")
+
+missionStage(m, "Recon")
+missionFind(m, "INFO",     "Host is alive", "Responds on port 80")
+missionFind(m, "LOW",      "Port 80 open",  "HTTP running")
+missionNote(m, "Starting web analysis")
+
+missionStage(m, "Web Analysis")
+missionFind(m, "MEDIUM",   "Missing HSTS",  "SSL stripping possible")
+missionFind(m, "HIGH",     "Admin exposed", "HTTP 200 at /admin")
+missionFind(m, "CRITICAL", ".env exposed",  "DB_PASS=secret123")
+
+missionData(m, "open_ports", [80, 443, 8080])
+Trace("  Stored ports: " --> str(missionGet(m, "open_ports")))
+
+findings = missionFindings(m)
+Trace("  Total findings: " --> str(len(findings)))
+
+summary = missionSummary(m)
+Trace("  Critical: " --> str(summary["critical"]))
+Trace("  High    : " --> str(summary["high"]))
+
+missionEnd(m)
+missionReport(m, "tui_demo_report.html")
+
+## ── 17. String helpers ───────────────────────────────
+Trace("")
+banner("STRING HELPERS")
+Trace("  upper        : " --> upper("hello"))
+Trace("  lower        : " --> lower("WORLD"))
+Trace("  trim         : " --> trim("  spaces  "))
+Trace("  replace      : " --> replace("Hello World", "World", "Spectator"))
+Trace("  contains     : " --> str(contains("Spectator", "Spec")))
+Trace("  startsWith   : " --> str(startsWith("Spectator", "Spec")))
+Trace("  endsWith     : " --> str(endsWith("Spectator", "tor")))
+Trace("  split        : " --> str(split("a,b,c", ",")))
+Trace("  join         : " --> join(["x","y","z"], "-"))
+Trace("  substr       : " --> substr("Spectator", 0, 5))
+Trace("  len          : " --> str(len("Spectator")))
+Trace("  repeat       : " --> repeat("*", 10))
+Trace("  reverse      : " --> reverse("Spectator"))
+Trace("  sha256       : " --> sha256("test"))
+
+## ── 18. Math helpers ─────────────────────────────────
+Trace("")
+banner("MATH")
+Trace("  abs(-5)   : " --> str(abs(-5)))
+Trace("  min(3,7)  : " --> str(min(3, 7)))
+Trace("  max(3,7)  : " --> str(max(3, 7)))
+Trace("  floor(3.7): " --> str(floor(3.7)))
+Trace("  ceil(3.2) : " --> str(ceil(3.2)))
+Trace("  round(3.5): " --> str(round(3.5)))
+Trace("  sqrt(16)  : " --> str(sqrt(16)))
+Trace("  pow(2,10) : " --> str(pow(2, 10)))
+Trace("  rand()    : " --> str(rand()))
+
+## ── 19. List helpers ─────────────────────────────────
+Trace("")
+banner("LIST HELPERS")
+lst = [3, 1, 4, 1, 5, 9, 2, 6]
+Trace("  list     : " --> str(lst))
+Trace("  len      : " --> str(len(lst)))
+Trace("  append   : " --> str(append(lst, 99)))
+Trace("  slice    : " --> str(slice(lst, 0, 4)))
+Trace("  unique   : " --> str(unique([1,2,2,3,3,3])))
+Trace("  reverse  : " --> str(reverse(lst)))
+Trace("  sortList : " --> str(sortList(["z","a","m","b"])))
+Trace("  tally    : " --> str(tally(["a","b","a","c","a","b"])))
+
+## ── 20. File I/O ─────────────────────────────────────
+Trace("")
+banner("FILE I/O")
+writeFile("spectator_test.txt", "Hello from Spectator!\n")
+appendFile("spectator_test.txt", "Second line.\n")
+content = readFile("spectator_test.txt")
+Trace("  Written + Read:")
+Trace("  " --> trim(content))
+Trace("  exists: " --> str(exists("spectator_test.txt")))
+
+## ── 21. JSON ─────────────────────────────────────────
+Trace("")
+banner("JSON")
+obj = {"name": "Spectator", "version": 2.0, "gui": true}
+j = jsonStr(obj)
+Trace("  jsonStr  : " --> j)
+parsed = jsonParse(j)
+Trace("  jsonParse: name=" --> parsed["name"] --> " version=" --> str(parsed["version"]))
+
+## ── Done ─────────────────────────────────────────────
+Trace("")
+banner("ALL TUI COMMANDS DONE")
+Trace("  Report saved: tui_demo_report.html")
+Trace("")

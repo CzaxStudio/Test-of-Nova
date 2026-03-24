@@ -1,0 +1,387 @@
+## ═══════════════════════════════════════════════════════
+##  all_gui.str — Every GUI command in one script
+##  Run: spectator run all_gui.str
+## ═══════════════════════════════════════════════════════
+
+#Import Spec.GUI
+
+## ── Window ──────────────────────────────────────────
+open.window({
+  "title":     "Spectator GUI — All Commands",
+  "width":     1050,
+  "height":    740,
+  "bg":        "#0f172a",
+  "accent":    "#38bdf8",
+  "text":      "#e2e8f0",
+  "font":      "Segoe UI",
+  "radius":    "8",
+  "padding":   "0",
+  "resizable": true,
+  "scrollbar": true,
+  "css":       ".g-output { font-size: 12px; }"
+})
+
+## ── Sidebar + layout ────────────────────────────────
+GUI.sidebar([
+  {"id": "widgets",  "label": "Widgets",  "icon": "▦"},
+  {"id": "inputs",   "label": "Inputs",   "icon": "✏"},
+  {"id": "runtime",  "label": "Runtime",  "icon": "⚙"}
+])
+
+## ════════════════════════════════════════════════════
+##  TAB 1 — WIDGETS
+## ════════════════════════════════════════════════════
+
+GUI.tabPanel("widgets", {"active": true})
+
+## Header
+GUI.header("Widgets", {
+  "subtitle": "Labels · Buttons · Cards · Badges · Alerts · Table · Image · Dividers"
+})
+
+## Labels
+GUI.label("Bold Label",   {"bold": true, "size": 18, "color": "#38bdf8"})
+GUI.label("Italic label", {"italic": true, "color": "#94a3b8"})
+GUI.label("Centered",     {"align": "center", "color": "#e2e8f0", "margin": "4px 0"})
+
+GUI.space(10)
+GUI.divider()
+GUI.space(10)
+
+## Buttons — all styles
+GUI.label("Buttons", {"bold": true, "color": "#64748b"})
+GUI.rowStart()
+GUI.button("Filled",   "b_filled",  {"color": "#38bdf8"})
+GUI.button("Success",  "b_success", {"color": "#22c55e"})
+GUI.button("Danger",   "b_danger",  {"color": "#ef4444"})
+GUI.button("Outline",  "b_outline", {"color": "#38bdf8", "outline": true})
+GUI.button("Small",    "b_small",   {"color": "#8b5cf6", "size": "sm"})
+GUI.button("Large",    "b_large",   {"color": "#f59e0b", "size": "lg"})
+GUI.rowEnd()
+
+GUI.rowStart()
+GUI.iconButton("🔍", "b_ico1", {"color": "#38bdf8", "size": "20px"})
+GUI.iconButton("⚙",  "b_ico2", {"color": "#94a3b8", "size": "20px"})
+GUI.iconButton("🗑",  "b_ico3", {"color": "#ef4444", "size": "20px"})
+GUI.link("I am a link", "b_link", {"color": "#38bdf8"})
+GUI.button("Disabled", "b_dis", {"color": "#475569", "disabled": true})
+GUI.rowEnd()
+
+GUI.space(10)
+GUI.divider({"text": "Cards & Badges", "color": "#334155"})
+GUI.space(8)
+
+## Cards
+GUI.rowStart({"align": "flex-start", "gap": "12px"})
+
+GUI.colStart({"width": "49%%"})
+GUI.card("Card with accent", {"accent": true})
+GUI.label("Content inside a card.")
+GUI.space(4)
+GUI.badge("NEW",    {"bg": "#38bdf8", "color": "#0f172a"})
+GUI.badge("ACTIVE", {"bg": "#22c55e"})
+GUI.cardEnd()
+GUI.colEnd()
+
+GUI.colStart({"width": "49%%"})
+GUI.card("Custom Card", {"bg": "#1e293b", "border": "#38bdf8", "radius": "14"})
+GUI.label("Custom bg + border.", {"color": "#94a3b8"})
+GUI.space(4)
+GUI.badge("CRITICAL", {"bg": "#ef4444"})
+GUI.badge("HIGH",     {"bg": "#f97316"})
+GUI.badge("LOW",      {"bg": "#3b82f6"})
+GUI.cardEnd()
+GUI.colEnd()
+
+GUI.rowEnd()
+GUI.space(10)
+
+## Alert boxes
+GUI.alert_box("This is an info alert",    {"type": "info"})
+GUI.alert_box("Operation was successful", {"type": "success"})
+GUI.alert_box("Check your settings",      {"type": "warning"})
+GUI.alert_box("Something went wrong",     {"type": "error"})
+GUI.space(10)
+
+## Table
+GUI.label("Table", {"bold": true, "color": "#64748b"})
+GUI.table("demo_table",
+  ["Name", "Version", "Status"],
+  [
+    ["coffee", "1.0.0", "Installed"],
+    ["ghost",  "1.0.0", "Installed"],
+    ["hello",  "0.9.0", "Available"]
+  ],
+  {"striped": true, "height": 140}
+)
+GUI.rowStart()
+GUI.button("Add Row",   "add_row",   {"color": "#475569", "size": "sm"})
+GUI.button("Clear Table","clear_tbl", {"color": "#475569", "size": "sm"})
+GUI.rowEnd()
+GUI.space(10)
+
+## Divider styles
+GUI.label("Dividers", {"bold": true, "color": "#64748b"})
+GUI.divider({"color": "#1e293b", "margin": "6px 0"})
+GUI.divider({"text": "Section Break", "color": "#475569"})
+GUI.divider({"color": "#38bdf8", "margin": "6px 0"})
+GUI.space(10)
+
+## Code block
+GUI.label("Code Block", {"bold": true, "color": "#64748b"})
+GUI.code("open.window({ \"title\": \"My App\", \"bg\": \"#0a0f1a\" })\nGUI.label(\"Hello!\")\nend()", {"height": 80})
+GUI.space(10)
+
+## Spinner
+GUI.rowStart()
+GUI.spinner("demo_spinner")
+GUI.label("  Loading indicator", {"color": "#64748b"})
+GUI.rowEnd()
+GUI.rowStart()
+GUI.button("Show", "show_spin", {"color": "#38bdf8", "size": "sm"})
+GUI.button("Hide", "hide_spin", {"color": "#475569", "size": "sm"})
+GUI.rowEnd()
+GUI.space(10)
+
+## Footer
+GUI.footer("Spectator GUI v3.0  ·  All widgets demo")
+
+GUI.tabPanelEnd()
+
+## ════════════════════════════════════════════════════
+##  TAB 2 — INPUTS
+## ════════════════════════════════════════════════════
+
+GUI.tabPanel("inputs", {})
+
+GUI.header("Inputs", {"subtitle": "Text · Password · Number · Dropdown · Slider · Checkbox · Toggle · Radio"})
+
+GUI.label("Text Input", {"bold": true, "color": "#64748b"})
+GUI.input("inp_text", "Type something...")
+
+GUI.label("Multiline", {"bold": true, "color": "#64748b"})
+GUI.input("inp_multi", "Multiple lines...", {"multiline": true, "rows": 3})
+
+GUI.label("Password", {"bold": true, "color": "#64748b"})
+GUI.password("inp_pass", "Enter password...")
+
+GUI.label("Number (0–100)", {"bold": true, "color": "#64748b"})
+GUI.number("inp_num", "0", {"min": "0", "max": "100", "step": "5", "value": "50"})
+
+GUI.label("Dropdown", {"bold": true, "color": "#64748b"})
+GUI.dropdown("inp_drop", ["Option A", "Option B", "Option C"])
+
+GUI.label("Slider", {"bold": true, "color": "#64748b"})
+GUI.slider("inp_slide", 0, 100, {"showValue": true, "color": "#38bdf8"})
+
+GUI.space(8)
+GUI.rowStart()
+GUI.checkbox("inp_chk", "Checkbox (unchecked)", {})
+GUI.checkbox("inp_chk2","Checkbox (checked)",   {"checked": true})
+GUI.rowEnd()
+
+GUI.rowStart()
+GUI.toggle("inp_tog",  "Toggle Off", {})
+GUI.toggle("inp_tog2", "Toggle On",  {"checked": true})
+GUI.rowEnd()
+
+GUI.space(6)
+GUI.label("Radio Group", {"bold": true, "color": "#64748b"})
+GUI.radio("inp_rad1", "color", "Red",   "red",   {"checked": true})
+GUI.radio("inp_rad2", "color", "Green", "green", {})
+GUI.radio("inp_rad3", "color", "Blue",  "blue",  {})
+
+GUI.space(12)
+GUI.button("Read All Values", "read_inputs", {"color": "#38bdf8"})
+GUI.space(8)
+GUI.output("inp_out", {"height": 160})
+
+GUI.tabPanelEnd()
+
+## ════════════════════════════════════════════════════
+##  TAB 3 — RUNTIME
+## ════════════════════════════════════════════════════
+
+GUI.tabPanel("runtime", {})
+
+GUI.header("Runtime", {"subtitle": "GUI.set · GUI.get · GUI.print · GUI.clear · GUI.show/hide · Progress · Theme"})
+
+GUI.label("Output Box (controlled at runtime)", {"bold": true, "color": "#64748b"})
+GUI.output("rt_out", {"height": 160})
+
+GUI.rowStart()
+GUI.button("Print",        "rt_print",   {"color": "#38bdf8"})
+GUI.button("Clear",        "rt_clear",   {"color": "#475569"})
+GUI.button("Alert",        "rt_alert",   {"color": "#f59e0b"})
+GUI.button("Confirm",      "rt_confirm", {"color": "#8b5cf6"})
+GUI.button("Notify",       "rt_notify",  {"color": "#22c55e"})
+GUI.rowEnd()
+
+GUI.space(12)
+GUI.divider({"text": "GUI.set + GUI.get", "color": "#334155"})
+GUI.space(8)
+
+GUI.input("rt_inp", "Change this with GUI.set...")
+GUI.rowStart()
+GUI.button("Set Value",  "rt_set",  {"color": "#38bdf8", "size": "sm"})
+GUI.button("Read Value", "rt_get",  {"color": "#475569", "size": "sm"})
+GUI.button("Focus",      "rt_focus",{"color": "#475569", "size": "sm"})
+GUI.rowEnd()
+
+GUI.space(12)
+GUI.divider({"text": "Show / Hide / Enable / Disable", "color": "#334155"})
+GUI.space(8)
+
+GUI.button("I can be hidden", "rt_target", {"color": "#8b5cf6", "id": "rt_target"})
+GUI.rowStart()
+GUI.button("Hide",    "do_hide",    {"color": "#475569", "size": "sm"})
+GUI.button("Show",    "do_show",    {"color": "#475569", "size": "sm"})
+GUI.button("Disable", "do_disable", {"color": "#475569", "size": "sm"})
+GUI.button("Enable",  "do_enable",  {"color": "#475569", "size": "sm"})
+GUI.rowEnd()
+
+GUI.space(12)
+GUI.divider({"text": "Progress + Spinner", "color": "#334155"})
+GUI.space(8)
+
+GUI.progress("rt_bar", {"color": "#38bdf8", "height": 10, "label": "Progress"})
+GUI.rowStart()
+GUI.button("Fill",  "rt_fill",  {"color": "#38bdf8", "size": "sm"})
+GUI.button("Reset", "rt_reset", {"color": "#475569", "size": "sm"})
+GUI.rowEnd()
+GUI.space(6)
+GUI.spinner("rt_spin")
+GUI.rowStart()
+GUI.button("Show Spinner", "rt_show_spin", {"color": "#38bdf8", "size": "sm"})
+GUI.button("Hide Spinner", "rt_hide_spin", {"color": "#475569", "size": "sm"})
+GUI.rowEnd()
+
+GUI.space(12)
+GUI.divider({"text": "Theme at runtime", "color": "#334155"})
+GUI.space(8)
+
+GUI.label("Background", {"color": "#64748b"})
+GUI.rowStart()
+GUI.button("Dark Blue",   "bg_blue",   {"color": "#0c1a2e",  "outline": true})
+GUI.button("Dark Purple", "bg_purple", {"color": "#0d0a1a",  "outline": true})
+GUI.button("Midnight",    "bg_black",  {"color": "#030712",  "outline": true})
+GUI.button("Dark Green",  "bg_green",  {"color": "#071a0e",  "outline": true})
+GUI.rowEnd()
+
+GUI.label("Accent", {"color": "#64748b"})
+GUI.rowStart()
+GUI.button("Cyan",    "ac_cyan",   {"color": "#38bdf8"})
+GUI.button("Purple",  "ac_purple", {"color": "#a855f7"})
+GUI.button("Green",   "ac_green",  {"color": "#22c55e"})
+GUI.button("Orange",  "ac_orange", {"color": "#f97316"})
+GUI.button("Pink",    "ac_pink",   {"color": "#ec4899"})
+GUI.rowEnd()
+
+GUI.tabPanelEnd()
+
+GUI.sidebarEnd()
+
+## ════════════════════════════════════════════════════
+##  EVENTS
+## ════════════════════════════════════════════════════
+
+## Sidebar navigation
+GUI.on("sidebar:widgets", func() { GUI.eval("_sOpenTab('widgets','default')") })
+GUI.on("sidebar:inputs",  func() { GUI.eval("_sOpenTab('inputs','default')") })
+GUI.on("sidebar:runtime", func() { GUI.eval("_sOpenTab('runtime','default')") })
+
+## ── Widgets tab ──────────────────────────────────────
+GUI.on("b_filled",  func() { GUI.print("rt_out", "Filled button clicked") })
+GUI.on("b_success", func() { GUI.print("rt_out", "Success button clicked") })
+GUI.on("b_danger",  func() { GUI.print("rt_out", "Danger button clicked") })
+GUI.on("b_outline", func() { GUI.print("rt_out", "Outline button clicked") })
+GUI.on("b_small",   func() { GUI.print("rt_out", "Small button clicked") })
+GUI.on("b_large",   func() { GUI.print("rt_out", "Large button clicked") })
+GUI.on("b_ico1",    func() { GUI.print("rt_out", "Search icon clicked") })
+GUI.on("b_ico2",    func() { GUI.print("rt_out", "Settings icon clicked") })
+GUI.on("b_ico3",    func() { GUI.print("rt_out", "Delete icon clicked") })
+GUI.on("b_link",    func() { GUI.print("rt_out", "Link clicked") })
+
+row_n = 3
+GUI.on("add_row", func() {
+  row_n += 1
+  GUI.appendRow("demo_table", ["lib_" --> str(row_n), "1.0." --> str(row_n), "New"])
+})
+GUI.on("clear_tbl", func() { GUI.clearTable("demo_table") })
+
+GUI.on("show_spin", func() { GUI.showSpinner("demo_spinner") })
+GUI.on("hide_spin", func() { GUI.hideSpinner("demo_spinner") })
+
+## ── Inputs tab ───────────────────────────────────────
+GUI.on("read_inputs", func() {
+  GUI.clear("inp_out")
+  GUI.print("inp_out", "text  : " --> GUI.get("inp_text"))
+  GUI.print("inp_out", "multi : " --> truncate(GUI.get("inp_multi"), 40))
+  GUI.print("inp_out", "pass  : " --> repeat("*", len(GUI.get("inp_pass"))))
+  GUI.print("inp_out", "num   : " --> GUI.get("inp_num"))
+  GUI.print("inp_out", "drop  : " --> GUI.get("inp_drop"))
+  GUI.print("inp_out", "slide : " --> GUI.get("inp_slide"))
+  GUI.print("inp_out", "chk   : " --> GUI.get("inp_chk"))
+  GUI.print("inp_out", "tog   : " --> GUI.get("inp_tog"))
+  GUI.print("inp_out", "radio : " --> GUI.get("inp_rad1"))
+})
+
+## ── Runtime tab ──────────────────────────────────────
+line_n = 0
+GUI.on("rt_print", func() {
+  line_n += 1
+  GUI.print("rt_out", "[" --> str(line_n) --> "] Line printed at " --> timestamp())
+})
+GUI.on("rt_clear", func() {
+  GUI.clear("rt_out")
+  line_n = 0
+})
+GUI.on("rt_alert",   func() { GUI.alert("Hello from Spectator!") })
+GUI.on("rt_notify",  func() { GUI.notify("Spectator", "Desktop notification sent!") })
+GUI.on("rt_confirm", func() {
+  ok = GUI.confirm("Do you confirm?")
+  if ok {
+    GUI.print("rt_out", "Confirmed!")
+  } else {
+    GUI.print("rt_out", "Cancelled.")
+  }
+})
+
+GUI.on("rt_set",   func() { GUI.set("rt_inp", "Value set by GUI.set()") })
+GUI.on("rt_get",   func() { GUI.print("rt_out", "Value: " --> GUI.get("rt_inp")) })
+GUI.on("rt_focus", func() { GUI.focus("rt_inp") })
+
+GUI.on("do_hide",    func() { GUI.hide("rt_target") })
+GUI.on("do_show",    func() { GUI.show("rt_target") })
+GUI.on("do_disable", func() { GUI.disable("rt_target") })
+GUI.on("do_enable",  func() { GUI.enable("rt_target") })
+
+GUI.on("rt_fill", func() {
+  i = 0
+  loop 20 {
+    GUI.setProgress("rt_bar", (i + 1) / 20)
+    sleep(40)
+    i += 1
+  }
+})
+GUI.on("rt_reset",      func() { GUI.setProgress("rt_bar", 0) })
+GUI.on("rt_show_spin",  func() { GUI.showSpinner("rt_spin") })
+GUI.on("rt_hide_spin",  func() { GUI.hideSpinner("rt_spin") })
+
+GUI.on("bg_blue",   func() { GUI.setBg("#0c1a2e") })
+GUI.on("bg_purple", func() { GUI.setBg("#0d0a1a") })
+GUI.on("bg_black",  func() { GUI.setBg("#030712") })
+GUI.on("bg_green",  func() { GUI.setBg("#071a0e") })
+
+GUI.on("ac_cyan",   func() { GUI.setAccent("#38bdf8") })
+GUI.on("ac_purple", func() { GUI.setAccent("#a855f7") })
+GUI.on("ac_green",  func() { GUI.setAccent("#22c55e") })
+GUI.on("ac_orange", func() { GUI.setAccent("#f97316") })
+GUI.on("ac_pink",   func() { GUI.setAccent("#ec4899") })
+
+GUI.on("rt_title",  func() { GUI.setTitle("Title Changed!") })
+GUI.on("rt_css",    func() { GUI.css(".g-output", "fontSize", "11px") })
+GUI.on("rt_addcls", func() { GUI.addClass("rt_target", "g-btn-outline") })
+GUI.on("rt_eval",   func() { GUI.eval("document.title='eval worked'") })
+
+end()
