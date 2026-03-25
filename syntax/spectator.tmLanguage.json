@@ -1,0 +1,246 @@
+{
+"name": "Spectator",
+"scopeName": "source.spectator",
+"patterns": [
+{ "include": "#comments" },
+{ "include": "#imports" },
+{ "include": "#shell" },
+{ "include": "#gui" },
+{ "include": "#keywords" },
+{ "include": "#functions" },
+{ "include": "#strings" },
+{ "include": "#numbers" },
+{ "include": "#operators" },
+{ "include": "#identifiers" },
+{ "include": "#blocks" },
+{ "include": "#function-definitions" },
+{ "include": "#loops" },
+{ "include": "#match" },
+{ "include": "#dot-notation" }
+],
+"repository": {
+"comments": {
+"patterns": [
+{
+"name": "comment.line.number-sign.spectator",
+"match": "##.$"
+}
+]
+},
+"imports": {
+"patterns": [
+{
+"name": "keyword.control.import.spectator",
+"match": "^\s#Import\s+.$"
+}
+]
+},
+"shell": {
+"patterns": [
+{
+"name": "keyword.control.shell.spectator",
+"begin": "# runner<?",
+"end": ">",
+"patterns": [
+{ "include": "source.shell" }
+]
+}
+]
+},
+"gui": {
+"patterns": [
+{
+"name": "support.class.spectator",
+"match": "\b(GUI|open\.window|GUI\.button|GUI\.input|GUI\.on|GUI\.print|GUI\.get|GUI\.set|GUI\.clear|GUI\.setProgress|GUI\.show|GUI\.hide|GUI\.enable|GUI\.disable|GUI\.focus|GUI\.setTitle|GUI\.setAccent|GUI\.setBg|GUI\.alert|GUI\.confirm|GUI\.notify|GUI\.eval|GUI\.css|GUI\.openTab|GUI\.showSpinner|GUI\.hideSpinner|GUI\.appendRow|GUI\.clearTable)\b"
+}
+]
+},
+"keywords": {
+"patterns": [
+{
+"name": "keyword.control.spectator",
+"match": "\b(if|elseif|else|loop|each|match|try|catch|throw|func|return|spawn|end)\b"
+}
+]
+},
+"functions": {
+"patterns": [
+{
+"name": "support.function.spectator",
+"match": "\b(Trace|Recon|PortScan|HTTPProbe|resolve|http|join|str|payloadList|missionStart|missionFind|missionEnd|upper|lower|trim|split|contains|startsWith|substr|truncate|pad|replace|reverse|repeat|regex|regexMatch|append|len|slice|unique|sortList|tally|diff|intersect|gather|hasPort|portServices|lookupMX|lookupNS|lookupTXT|Capture|httpStatus|httpHeader|httpBody|extractTitle|extractEmails|writeFile|appendFile|readFile|exists|jsonStr|jsonParse|missionStage|missionNote|missionReport)\b"
+}
+]
+},
+"strings": {
+"patterns": [
+{
+"name": "string.quoted.double.spectator",
+"begin": """,
+"end": """,
+"patterns": [
+{
+"name": "constant.character.escape.spectator",
+"match": "\\(\\|"|n|r|t)"
+}
+]
+},
+{
+"name": "string.quoted.double.fstring.spectator",
+"begin": "f"",
+"end": """,
+"patterns": [
+{
+"name": "constant.character.escape.spectator",
+"match": "\\(\\|"|n|r|t)"
+},
+{
+"name": "variable.other.interpolation.spectator",
+"match": "\{[^}]\}"
+}
+]
+}
+]
+},
+"numbers": {
+"patterns": [
+{
+"name": "constant.numeric.spectator",
+"match": "\b\d+(\.\d+)?\b"
+}
+]
+},
+"operators": {
+"patterns": [
+{
+"name": "keyword.operator.assignment.spectator",
+"match": "="
+},
+{
+"name": "keyword.operator.special.spectator",
+"match": "-->"
+},
+{
+"name": "keyword.operator.comparison.spectator",
+"match": "==|!=|<=|>=|<|>"
+},
+{
+"name": "keyword.operator.arithmetic.spectator",
+"match": "\+|\-|\*|/|%"
+}
+]
+},
+"identifiers": {
+"patterns": [
+{
+"name": "variable.other.spectator",
+"match": "\b[a-zA-Z_][a-zA-Z0-9_]*\b"
+}
+]
+},
+"blocks": {
+"patterns": [
+{
+"name": "punctuation.section.block.begin.spectator",
+"match": "\{"
+},
+{
+"name": "punctuation.section.block.end.spectator",
+"match": "\}"
+}
+]
+},
+"function-definitions": {
+"patterns": [
+{
+"name": "meta.function.spectator",
+"begin": "\b(func)\s+([a-zA-Z_][a-zA-Z0-9_])\s\([^)]\)\s\{",
+"beginCaptures": {
+"1": { "name": "keyword.control.spectator" },
+"2": { "name": "entity.name.function.spectator" }
+},
+"end": "\}",
+"patterns": [
+{ "include": "#comments" },
+{ "include": "#strings" },
+{ "include": "#keywords" },
+{ "include": "#functions" },
+{ "include": "#operators" },
+{ "include": "#numbers" }
+]
+}
+]
+},
+"loops": {
+"patterns": [
+{
+"name": "meta.loop.each.spectator",
+"begin": "\b(each)\s+([a-zA-Z_][a-zA-Z0-9_])\s(?:,\s*([a-zA-Z_][a-zA-Z0-9_]*))?\s:\s([a-zA-Z_][a-zA-Z0-9_])\s\{",
+"beginCaptures": {
+"1": { "name": "keyword.control.spectator" },
+"2": { "name": "variable.other.spectator" },
+"3": { "name": "variable.other.spectator" },
+"4": { "name": "variable.other.spectator" }
+},
+"end": "\}",
+"patterns": [
+{ "include": "#comments" },
+{ "include": "#strings" },
+{ "include": "#keywords" },
+{ "include": "#functions" },
+{ "include": "#operators" },
+{ "include": "#numbers" }
+]
+},
+{
+"name": "meta.loop.spectator",
+"begin": "\b(loop)\b",
+"beginCaptures": {
+"1": { "name": "keyword.control.spectator" }
+},
+"end": "(?=end\b|\})",
+"patterns": [
+{ "include": "#comments" },
+{ "include": "#strings" },
+{ "include": "#keywords" },
+{ "include": "#functions" },
+{ "include": "#operators" },
+{ "include": "#numbers" }
+]
+}
+]
+},
+"match": {
+"patterns": [
+{
+"name": "meta.match.spectator",
+"begin": "\b(match)\s+([a-zA-Z_][a-zA-Z0-9_])\s\{",
+"beginCaptures": {
+"1": { "name": "keyword.control.spectator" },
+"2": { "name": "variable.other.spectator" }
+},
+"end": "\}",
+"patterns": [
+{
+"name": "keyword.control.match-case.spectator",
+"match": "\b(|[a-zA-Z][a-zA-Z0-9_])\s=>"
+},
+{ "include": "#comments" },
+{ "include": "#strings" },
+{ "include": "#functions" },
+{ "include": "#operators" },
+{ "include": "#numbers" }
+]
+}
+]
+},
+"dot-notation": {
+"patterns": [
+{
+"name": "variable.other.property.spectator",
+"match": "\b[a-zA-Z_][a-zA-Z0-9_]*\.[a-zA-Z_][a-zA-Z0-9_]*\b"
+}
+]
+}
+}
+}
+
