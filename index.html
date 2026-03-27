@@ -417,14 +417,13 @@
 
 <script>
     (function() {
-        // OS Detection + Release URLs (matching the exact tags)
         const RELEASE_MAP = {
             windows: "https://github.com/CzaxStudio/Spectator/releases/tag/Windows",
             linux: "https://github.com/CzaxStudio/Spectator/releases/tag/Linux",
             mac: "https://github.com/CzaxStudio/Spectator/releases/tag/Mac",
             macarm: "https://github.com/CzaxStudio/Spectator/releases/tag/Mac" // M1 uses same mac release (binary included)
         };
-        // Additional macOS ARM would be the same tag but we differentiate display.
+
         let detectedOS = "linux";
         function detectPlatform() {
             const ua = navigator.userAgent;
