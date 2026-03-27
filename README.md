@@ -27,6 +27,8 @@ Feature of making GUI tools is available only for Windows for now. (CLI and TUI 
 
 ---
 
+# Official Website --> https://spectatorlang.pages.dev/
+
 ## What is Spectator?
 
 Spectator is a purpose-built scripting language for cybersecurity work. It combines the simplicity of Python with built-in security modules, a native GUI framework, and a package manager — all compiled into a single standalone binary.
