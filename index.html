@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Spectator | See Everything. Miss Nothing.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0c12;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, 'Courier New', monospace;
+            color: #e2e8f0;
+            line-height: 1.5;
+            scroll-behavior: smooth;
+        }
+
+        /* ASCII Header Styling */
+        .ascii-header {
+            background: linear-gradient(135deg, #0a0f1a 0%, #03060c 100%);
+            padding: 2rem 1rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid #1e2a3a;
+            overflow-x: auto;
+        }
+
+        .ascii-art {
+            font-family: 'Courier New', 'Fira Code', monospace;
+            font-size: 0.7rem;
+            line-height: 1.2;
+            color: #00d4aa;
+            white-space: pre;
+            display: inline-block;
+            text-shadow: 0 0 3px #00d4aa33;
+            letter-spacing: 0;
+        }
+
+        @media (max-width: 768px) {
+            .ascii-art { font-size: 0.45rem; }
+        }
+
+        .eagle-logo {
+            margin: 1.5rem 0;
+        }
+        .eagle-logo img {
+            max-width: 180px;
+            border-radius: 20px;
+            filter: drop-shadow(0 0 12px #00d4aa66);
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+            background: linear-gradient(120deg, #cbd5e6, #00d4aa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin: 0.5rem 0;
+        }
+
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 1.2rem 0;
+        }
+        .badge {
+            background: #11181c;
+            padding: 0.3rem 0.9rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid #2d3e42;
+            color: #9ad7d0;
+        }
+
+        /* Navigation */
+        .nav-bar {
+            background: #0f141cd9;
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #1e3a3a;
+        }
+        .nav-bar a {
+            color: #b0f0e0;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .nav-bar a:hover { color: #00ffcc; text-shadow: 0 0 4px #0ff; }
+
+        /* Container */
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Download Section */
+        .download-section {
+            background: linear-gradient(145deg, #0e1622, #080c14);
+            border-radius: 2rem;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid #2a4b4a;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+        }
+        .os-detector {
+            background: #00000066;
+            padding: 0.5rem 1rem;
+            border-radius: 60px;
+            display: inline-block;
+            margin-bottom: 1rem;
+            font-family: monospace;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .btn {
+            padding: 0.9rem 2rem;
+            border-radius: 60px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: #00d4aa;
+            color: #0a0c12;
+            box-shadow: 0 0 10px #00d4aa88;
+        }
+        .btn-primary:hover {
+            background: #00ffcc;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px #00ffcc;
+        }
+        .btn-secondary {
+            background: #1e2a3a;
+            color: #ccf4ed;
+            border: 1px solid #3e6b64;
+        }
+        .btn-secondary:hover {
+            background: #2a3f48;
+            border-color: #00d4aa;
+        }
+        .alt-downloads {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+        }
+        .alt-link {
+            color: #8bcbc1;
+            text-decoration: none;
+            border-bottom: 1px dashed #3b6e64;
+        }
+
+        /* Feature Grid */
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 2rem 0 1rem;
+            border-left: 5px solid #00d4aa;
+            padding-left: 1rem;
+        }
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.8rem;
+            margin: 2rem 0;
+        }
+        .card {
+            background: #0f1722cc;
+            backdrop-filter: blur(4px);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid #2c4b4a;
+            transition: 0.2s;
+        }
+        .card h3 {
+            color: #00d4aa;
+            margin-bottom: 0.8rem;
+            font-size: 1.4rem;
+        }
+        .code-block {
+            background: #03060b;
+            padding: 1rem;
+            border-radius: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 3px solid #00d4aa;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #0b1019;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #2a3a3a;
+        }
+        th {
+            background: #111b24;
+            color: #00d4aa;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            border-top: 1px solid #1e3a3a;
+            color: #6c8b86;
+            font-size: 0.8rem;
+        }
+        @media (max-width: 700px) {
+            .btn-group { flex-direction: column; align-items: stretch; }
+            .btn { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="ascii-header">
+    <pre class="ascii-art">
+███████╗██████╗ ███████╗ ██████╗████████╗ █████╗ ████████╗ ██████╗ ██████╗
+██╔════╝██╔══██╗██╔════╝██╔════╝╚══██╔══╝██╔══██╗╚══██╔══╝██╔═══██╗██╔══██╗
+███████╗██████╔╝█████╗  ██║        ██║   ███████║   ██║   ██║   ██║██████╔╝
+╚════██║██╔═══╝ ██╔══╝  ██║        ██║   ██╔══██║   ██║   ██║   ██║██╔══██╗
+███████║██║     ███████╗╚██████╗   ██║   ██║  ██║   ██║   ╚██████╔╝██║  ██║
+╚══════╝╚═╝     ╚══════╝ ╚═════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
+    </pre>
+    <div class="eagle-logo">
+        <img src="https://github.com/user-attachments/assets/86fc8d27-9903-480f-97ba-1712f40b73b6" alt="Spectator Eagle" style="max-width:140px">
+    </div>
+    <div class="tagline">See Everything. Miss Nothing</div>
+    <div class="badge-container">
+        <span class="badge">Cybersecurity DSL</span>
+        <span class="badge">Python-like + Built-in Hacking</span>
+        <span class="badge">Native GUI (Windows)</span>
+        <span class="badge">Space Package Manager</span>
+        <span class="badge">Mission Engine + Reports</span>
+    </div>
+</div>
+
+<div class="nav-bar">
+    <a href="#features">Features</a>
+    <a href="#examples">Examples</a>
+    <a href="#gui">GUI Toolkit</a>
+    <a href="#space">Space Manager</a>
+    <a href="#docs">Docs</a>
+</div>
+
+<div class="container">
+    <!-- Download Section with OS detection -->
+    <div class="download-section" id="download">
+        <div class="os-detector" id="osDisplay">
+              Detecting your platform ...
+        </div>
+        <h2 style="font-size: 1.8rem;">Download Spectator</h2>
+        <p>Single binary — no runtime needed. Build GUI tools, recon scripts, and automate assessments.</p>
+        <div class="btn-group">
+            <button id="mainDownloadBtn" class="btn btn-primary">⬇️ DOWNLOAD (AUTO)</button>
+            <a href="#docs" class="btn btn-secondary" id="docsQuickBtn">Read Documentation</a>
+        </div>
+        <div class="alt-downloads">
+            <span>Manual downloads:</span>
+            <a href="#" id="winLink" class="alt-link" target="_blank">Windows (.exe)</a>
+            <a href="#" id="linuxLink" class="alt-link" target="_blank">Linux (64-bit)</a>
+            <a href="#" id="macLink" class="alt-link" target="_blank">macOS (Intel)</a>
+            <a href="#" id="macArmLink" class="alt-link" target="_blank">macOS (Apple Silicon)</a>
+            <a href="https://github.com/CzaxStudio/Spectator" target="_blank" class="alt-link">GitHub Source</a>
+        </div>
+        <p style="margin-top: 1rem; font-size:0.8rem;"><span style="color:#00d4aa;">GUI tools available on Windows</span> (Linux/macOS: CLI & TUI). All features work across platforms.</p>
+    </div>
+
+    <!-- FEATURES SECTION (high-level security language) -->
+    <div id="features">
+        <div class="section-title">Built for Offensive Security & Automation</div>
+        <div class="grid-2col">
+            <div class="card">
+                <h3>Recon & OSINT</h3>
+                <p>DNS, port scans, subdomain enum, WHOIS, GeoIP, banner grabbing. One-liner recon.</p>
+                <div class="code-block">ips = resolve("target.com")<br>PortScan(target, 1, 1024)<br>SubdomainEnum(target)</div>
+            </div>
+            <div class="card">
+                <h3>Web Hacking Engine</h3>
+                <p>HTTP client with sessions, fuzzing, header audit, SQLi test, CORS, SSRF, path traversal.</p>
+                <div class="code-block">resp = http("GET", url)<br>HeaderAudit(resp)<br>SQLiTest(url, param)</div>
+            </div>
+            <div class="card">
+                <h3>Native GUI Framework</h3>
+                <p>Build real desktop security tools: inputs, tables, buttons, output windows — without web tech.</p>
+                <div class="code-block">open.window({"title":"Recon"})<br>GUI.input("target")<br>GUI.button("Scan")</div>
+            </div>
+            <div class="card">
+                <h3>Space Package Manager</h3>
+                <p>Install verified libraries: <code>coffee</code> (recon), <code>ghost</code> (OSINT). SHA-256 verified.</p>
+                <div class="code-block">spectator space get coffee<br>#Import coffee</div>
+            </div>
+            <div class="card">
+                <h3>Mission Pipeline</h3>
+                <p>Structured pentest workflow + auto-generate HTML reports with findings.</p>
+                <div class="code-block">missionStart("Pentest")<br>missionFind(m, "CRITICAL", "issue")<br>missionReport(m, "report.html")</div>
+            </div>
+            <div class="card">
+                <h3>Payload Generation</h3>
+                <p>XSS, SQLi, SSTI, LFI, CMD, XXE, LDAP, NoSQL payloads — instant.</p>
+                <div class="code-block">payloads = payloadList("xss")<br>p = PayloadGen("sqli")</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK EXAMPLES SECTION -->
+    <div id="examples">
+        <div class="section-title">Spectator in Action</div>
+        <div class="grid-2col">
+            <div class="card">
+                <h3>DNS + Port Scanner</h3>
+                <div class="code-block">target = "scanme.nmap.org"<br>ips = resolve(target)<br>ports = [22,80,443,3306]<br>each p : ports {<br>  if hasPort(target,p) { Trace("open: " + str(p)) }<br>}</div>
+            </div>
+            <div class="card">
+                <h3>GUI Pentest Tool</h3>
+                <div class="code-block">#Import Spec.GUI<br>open.window({"title":"Ghost Recon"})<br>GUI.input("target")<br>GUI.button("Scan", "run")<br>GUI.on("run", func() {<br>  t = GUI.get("target")<br>  GUI.print("out", "Scanning " + t)<br>})<br>end()</div>
+            </div>
+            <div class="card">
+                <h3>Security Header Audit</h3>
+                <div class="code-block">url = "https://example.com"<br>resp = http("GET", url)<br>hdrs = ["strict-transport-security","csp"]<br>each h : hdrs {<br>  if httpHeader(resp, h) == "" { Trace("Missing: " + h) }<br>}</div>
+            </div>
+            <div class="card">
+                <h3>Mission Report</h3>
+                <div class="code-block">m = missionStart("Web Audit", "target.com")<br>missionStage(m, "Recon")<br>missionFind(m, "HIGH", "Missing CSP")<br>missionEnd(m)<br>missionReport(m, "audit.html")</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GUI REFERENCE SUMMARY -->
+    <div id="gui">
+        <div class="section-title">GUI Widgets (Windows/Linux/macOS)</div>
+        <p>Build professional cybersecurity tools with native widgets: <code>label, input, button, output, table, tabs, sidebar, progress, image, code, alert_box</code> and more.</p>
+        <div class="grid-2col" style="margin-top: 0.5rem;">
+            <div class="card">
+                <h3>Runtime GUI Commands</h3>
+                <div class="code-block">GUI.get("id")<br>GUI.set("id", "value")<br>GUI.print("out", "Log line")<br>GUI.disable("btn")<br>GUI.setProgress("bar", 0.75)<br>GUI.alert("Scan complete")</div>
+            </div>
+            <div class="card">
+                <h3>Window Customization</h3>
+                <div class="code-block">open.window({<br>  "title":"Recon", "bg":"#0f172a",<br>  "accent":"#00d4aa", "width":1100<br>})</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Space Package Manager + Library Table -->
+    <div id="space">
+        <div class="section-title">Space Package Manager — Supply-Chain Secure</div>
+        <p><code>spectator space get coffee</code> • <code>spectator space get ghost</code> • SHA-256 verification.</p>
+        <table style="margin: 1.5rem 0;">
+            <thead>
+                <tr><th>Library</th><th>Description</th><th>Command</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>Coffee</strong></td><td>Full recon: DNS, ports, web, scoring</td><td><code>spectator space get coffee</code></td></tr>
+                <tr><td><strong>Ghost</strong></td><td>OSINT: domain intelligence, email, username enumeration</td><td><code>spectator space get ghost</code></td></tr>
+            </tbody>
+        </table>
+        <div class="code-block">#Import coffee<br>coffee_full("target.com")   // run full recon<br>#Import ghost<br>ghost_domain("example.com")</div>
+    </div>
+
+    <!-- DOCS LINK + FULL DOC REFERENCE -->
+    <div id="docs">
+        <div class="section-title">Official Spectator Documentation</div>
+        <p>Explore the complete language reference, GUI manual, mission engine, and space registry.</p>
+        <div class="btn-group" style="margin-top: 1rem;">
+            <a href="https://github.com/CzaxStudio/SpectatorDocs/" target="_blank" class="btn btn-primary">Read Full Docs (GitHub)</a>
+            <a href="https://github.com/CzaxStudio/Spectator" target="_blank" class="btn btn-secondary">Spectator Source</a>
+        </div>
+        <div class="card" style="margin-top: 1.5rem;">
+            <h3>Build & Cross-Compile</h3>
+            <div class="code-block">spectator build script.str to myapp.exe for windows<br>spectator run payload.str<br>spectator repl</div>
+            <p>Build standalone binaries — no dependency for end users.</p>
+        </div>
+    </div>
+    <footer>
+        <p>Spectator v2.0 — See Everything. Miss Nothing. | MIT License | Built by CzaxStudio</p>
+        <p>For authorized security testing only. Use responsibly.</p>
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // OS Detection + Release URLs (matching the exact tags)
+        const RELEASE_MAP = {
+            windows: "https://github.com/CzaxStudio/Spectator/releases/tag/Windows",
+            linux: "https://github.com/CzaxStudio/Spectator/releases/tag/Linux",
+            mac: "https://github.com/CzaxStudio/Spectator/releases/tag/Mac",
+            macarm: "https://github.com/CzaxStudio/Spectator/releases/tag/Mac" // M1 uses same mac release (binary included)
+        };
+        // Additional macOS ARM would be the same tag but we differentiate display.
+        let detectedOS = "linux";
+        function detectPlatform() {
+            const ua = navigator.userAgent;
+            const platform = navigator.platform;
+            if (ua.indexOf("Win") !== -1 || platform.indexOf("Win") !== -1) return "windows";
+            if (ua.indexOf("Mac") !== -1 || platform.indexOf("Mac") !== -1 || ua.indexOf("Darwin") !== -1) {
+                // check for ARM mac
+                if (ua.indexOf("ARM") !== -1 || ua.indexOf("M1") !== -1 || ua.indexOf("M2") !== -1) return "macarm";
+                return "mac";
+            }
+            if (ua.indexOf("Linux") !== -1 || platform.indexOf("Linux") !== -1) return "linux";
+            return "linux";
+        }
+        detectedOS = detectPlatform();
+        const osDisplaySpan = document.getElementById("osDisplay");
+        let displayName = "";
+        if (detectedOS === "windows") displayName = "Windows (64-bit) — GUI Ready";
+        else if (detectedOS === "mac") displayName = "macOS Intel — CLI + TUI";
+        else if (detectedOS === "macarm") displayName = "macOS Apple Silicon — Native";
+        else displayName = "Linux (64-bit) — Full CLI & TUI";
+
+        if (osDisplaySpan) osDisplaySpan.innerHTML = `Detected: ${displayName}  |  Auto download matches your system`;
+
+        function getDownloadUrl() {
+            if (detectedOS === "windows") return RELEASE_MAP.windows;
+            if (detectedOS === "linux") return RELEASE_MAP.linux;
+            if (detectedOS === "mac" || detectedOS === "macarm") return RELEASE_MAP.mac;
+            return RELEASE_MAP.linux;
+        }
+
+        const mainBtn = document.getElementById("mainDownloadBtn");
+        if (mainBtn) {
+            mainBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                const url = getDownloadUrl();
+                if (url) window.open(url, "_blank");
+                else window.open("https://github.com/CzaxStudio/Spectator/releases", "_blank");
+            });
+            // set button text hint
+            let short = detectedOS === "windows" ? "Windows" : (detectedOS.includes("mac") ? "macOS" : "Linux");
+            mainBtn.innerHTML = `DOWNLOAD FOR ${short.toUpperCase()}`;
+        }
+
+        // manual links
+        const winLink = document.getElementById("winLink");
+        const linuxLink = document.getElementById("linuxLink");
+        const macLink = document.getElementById("macLink");
+        const macArmLink = document.getElementById("macArmLink");
+        if (winLink) winLink.href = RELEASE_MAP.windows;
+        if (linuxLink) linuxLink.href = RELEASE_MAP.linux;
+        if (macLink) macLink.href = RELEASE_MAP.mac;
+        if (macArmLink) macArmLink.href = RELEASE_MAP.mac;
+
+        const docsBtnQuick = document.getElementById("docsQuickBtn");
+        if (docsBtnQuick) docsBtnQuick.href = "https://github.com/CzaxStudio/SpectatorDocs/";
+        
+        // additional styling for documentation link consistency
+        const docLinks = document.querySelectorAll('a[href="#docs"]');
+        docLinks.forEach(link => {
+            link.addEventListener("click", (e) => {
+                e.preventDefault();
+                document.getElementById("docs").scrollIntoView({ behavior: "smooth" });
+            });
+        });
+    })();
+</script>
+</body>
+</html>
