@@ -1,3 +1,3 @@
-*.md linguist-language=Markdown
+*.md linguist-language=Hacker
 *.md linguist-detectable=true
 *.md linguist-documentation=false
