@@ -513,11 +513,11 @@ GUI.clearTable("table")      ## Clear all table rows
 
 | Feature | Windows | Linux | macOS |
 |---------|---------|-------|-------|
-| Terminal scripts | ✅ | ✅ | ✅ |
-| GUI apps | ✅ WebView2 | ✅ WebKitGTK | ✅ WKWebView |
-| Standalone builds | ✅ | ✅ | ✅ |
-| No runtime needed | ✅ | ✅ | ✅ |
-| Cross-compilation (no GUI) | ✅ | ✅ | ✅ |
+| Terminal scripts | Done | Done | Done |
+| GUI apps | Done WebView2 | Done WebKitGTK | Done WKWebView |
+| Standalone builds | Done | Done | Done |
+| No runtime needed | Done | Done | Done |
+| Cross-compilation (no GUI) | Done | Done | Done |
 
 **GUI dependencies:**
 - **Windows** — WebView2 runtime (pre-installed on Windows 10/11)
