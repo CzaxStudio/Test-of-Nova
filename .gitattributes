@@ -1,2 +1,6 @@
-*.json linguist-language=JSON
-*.md linguist-language=Markdown
+*.json linguist-language=JSON linguist-detectable=true
+*.md linguist-language=Markdown linguist-detectable=true
+
+# Reduce noise
+dist/** linguist-generated=true
+*.exe linguist-generated=true
