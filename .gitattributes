@@ -1,2 +1,14 @@
+# Ensure correct language detection
 *.json linguist-language=JSON
 *.md linguist-language=Markdown
+
+# Mark docs as documentation (won’t affect main language stats)
+*.md linguist-documentation=true
+
+# Optional: ignore build/output files
+dist/** linguist-generated=true
+build/** linguist-generated=true
+*.exe linguist-generated=true
+
+# Optional: ignore minified files
+*.min.js linguist-generated=true
