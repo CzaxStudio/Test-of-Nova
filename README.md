@@ -27,7 +27,7 @@ Feature of making GUI tools is available only for Windows for now. (CLI and TUI 
 
 ---
 
-## Official Website --> https://spectatorlang.pages.dev/
+## Official Website --> https://spectatorcyber.pages.dev/
 
 ## Learn Spectator --> https://github.com/CzaxStudio/SpectatorDocs/
 
