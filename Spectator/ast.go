@@ -1,5 +1,5 @@
-package main
 
+package main
 type Node interface{ nodeType() string }
 type Stmt interface {
 	Node
