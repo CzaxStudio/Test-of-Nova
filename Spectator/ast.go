@@ -1,5 +1,6 @@
+// AST node types for Spectator.
+// via interfaces with a nodeType() marker method.
 
-package main
 type Node interface{ nodeType() string }
 type Stmt interface {
 	Node
@@ -10,9 +11,9 @@ type Expr interface {
 	exprNode()
 }
 
-type Program struct{ Statements []Stmt }
+// statements
 
-func (p *Program) nodeType() string { return "Program" }
+type Program struct{ Body []Stmt }
 
 type AssignStmt struct {
 	Name  string
@@ -21,69 +22,60 @@ type AssignStmt struct {
 	Line  int
 }
 
-func (a *AssignStmt) nodeType() string { return "AssignStmt" }
-func (a *AssignStmt) stmtNode()        {}
-
-type TraceStmt struct {
-	Args []Expr
-	Line int
+type MapAssignStmt struct {
+	Map   string
+	Key   Expr
+	Value Expr
+	Line  int
 }
-
-func (t *TraceStmt) nodeType() string { return "TraceStmt" }
-func (t *TraceStmt) stmtNode()        {}
 
 type DoStmt struct {
-	Module  string
-	Args    []Expr
-	Capture string
-	Line    int
+	Call Expr
+	Line int
 }
-
-func (d *DoStmt) nodeType() string { return "DoStmt" }
-func (d *DoStmt) stmtNode()        {}
 
 type ImportStmt struct {
 	Library string
 	Line    int
 }
 
-func (i *ImportStmt) nodeType() string { return "ImportStmt" }
-func (i *ImportStmt) stmtNode()        {}
-
 type IfStmt struct {
 	Condition Expr
-	Body      []Stmt
+	Then      []Stmt
 	ElseIfs   []ElseIf
-	ElseBody  []Stmt
+	Else      []Stmt
 	Line      int
 }
+
 type ElseIf struct {
 	Condition Expr
 	Body      []Stmt
 }
 
-func (i *IfStmt) nodeType() string { return "IfStmt" }
-func (i *IfStmt) stmtNode()        {}
-
 type LoopStmt struct {
-	Count Expr
+	Count Expr // nil = infinite
 	Body  []Stmt
 	Line  int
 }
 
-func (l *LoopStmt) nodeType() string { return "LoopStmt" }
-func (l *LoopStmt) stmtNode()        {}
-
 type EachStmt struct {
-	Var    string
-	IdxVar string
-	List   Expr
-	Body   []Stmt
-	Line   int
+	Value    string
+	Key      string // optional
+	Iterable Expr
+	Body     []Stmt
+	Line     int
 }
 
-func (e *EachStmt) nodeType() string { return "EachStmt" }
-func (e *EachStmt) stmtNode()        {}
+type MatchStmt struct {
+	Subject Expr
+	Cases   []MatchCase
+	Line    int
+}
+
+type MatchCase struct {
+	Pattern Expr // nil = wildcard (_)
+	Body    []Stmt
+}
 
 type FuncStmt struct {
 	Name   string
@@ -92,143 +84,77 @@ type FuncStmt struct {
 	Line   int
 }
 
-func (f *FuncStmt) nodeType() string { return "FuncStmt" }
-func (f *FuncStmt) stmtNode()        {}
-
 type ReturnStmt struct {
 	Value Expr
 	Line  int
 }
 
-func (r *ReturnStmt) nodeType() string { return "ReturnStmt" }
-func (r *ReturnStmt) stmtNode()        {}
-
 type BreakStmt struct{ Line int }
 
-func (b *BreakStmt) nodeType() string { return "BreakStmt" }
-func (b *BreakStmt) stmtNode()        {}
+type ThrowStmt struct {
+	Message Expr
+	Line    int
+}
 
-type ContinueStmt struct{ Line int }
+type TryCatchStmt struct {
+	Try     []Stmt
+	ErrVar  string
+	Catch   []Stmt
+	Line    int
+}
 
-func (c *ContinueStmt) nodeType() string { return "ContinueStmt" }
-func (c *ContinueStmt) stmtNode()        {}
+type SpawnStmt struct {
+	Call Expr
+	Line int
+}
+
+type RunnerStmt struct {
+	Command string
+	Pipe    string
+	Line    int
+}
 
 type ExprStmt struct {
 	Expr Expr
 	Line int
 }
 
-func (e *ExprStmt) nodeType() string { return "ExprStmt" }
-func (e *ExprStmt) stmtNode()        {}
+// expressions
 
-// try { } catch err { }
-type TryStmt struct {
-	Body      []Stmt
-	ErrVar    string
-	CatchBody []Stmt
-	Line      int
-}
-
-func (t *TryStmt) nodeType() string { return "TryStmt" }
-func (t *TryStmt) stmtNode()        {}
-
-// match val { "a" => { } _ => { } }
-type MatchStmt struct {
-	Value   Expr
-	Cases   []MatchCase
-	Default []Stmt
-	Line    int
-}
-type MatchCase struct {
-	Pattern Expr
-	Body    []Stmt
-}
-
-func (m *MatchStmt) nodeType() string { return "MatchStmt" }
-func (m *MatchStmt) stmtNode()        {}
-
-// spawn func() { }   or   spawn funcName(args)
-type SpawnStmt struct {
-	Call Expr
-	Line int
-}
-
-func (s *SpawnStmt) nodeType() string { return "SpawnStmt" }
-func (s *SpawnStmt) stmtNode()        {}
-
-// map assignment: x["key"] = val
-type MapAssignStmt struct {
-	Map   string
-	Key   Expr
-	Value Expr
+type NumberLit struct {
+	Value float64
 	Line  int
 }
 
-func (m *MapAssignStmt) nodeType() string { return "MapAssignStmt" }
-func (m *MapAssignStmt) stmtNode()        {}
+type StringLit struct {
+	Value string
+	Line  int
+}
 
-// ── Expressions ───────────────────────────────────────────────────────────────
+type BoolLit struct {
+	Value bool
+	Line  int
+}
 
-type StringLit struct{ Value string }
-
-func (s *StringLit) nodeType() string { return "StringLit" }
-func (s *StringLit) exprNode()        {}
-
-type NumberLit struct{ Value float64 }
-
-func (n *NumberLit) nodeType() string { return "NumberLit" }
-func (n *NumberLit) exprNode()        {}
-
-type BoolLit struct{ Value bool }
-
-func (b *BoolLit) nodeType() string { return "BoolLit" }
-func (b *BoolLit) exprNode()        {}
-
-type NilLit struct{}
-
-func (n *NilLit) nodeType() string { return "NilLit" }
-func (n *NilLit) exprNode()        {}
+type NilLit struct{ Line int }
 
 type Identifier struct {
 	Name string
 	Line int
 }
 
-func (i *Identifier) nodeType() string { return "Identifier" }
-func (i *Identifier) exprNode()        {}
-
-type ConcatExpr struct {
-	Left  Expr
-	Right Expr
-}
-
-func (c *ConcatExpr) nodeType() string { return "ConcatExpr" }
-func (c *ConcatExpr) exprNode()        {}
-
 type BinaryExpr struct {
 	Op    string
 	Left  Expr
 	Right Expr
+	Line  int
 }
-
-func (b *BinaryExpr) nodeType() string { return "BinaryExpr" }
-func (b *BinaryExpr) exprNode()        {}
 
 type UnaryExpr struct {
 	Op      string
 	Operand Expr
+	Line    int
 }
-
-func (u *UnaryExpr) nodeType() string { return "UnaryExpr" }
-func (u *UnaryExpr) exprNode()        {}
-
-type CaptureExpr struct {
-	Prompt Expr
-	Line   int
-}
-
-func (c *CaptureExpr) nodeType() string { return "CaptureExpr" }
-func (c *CaptureExpr) exprNode()        {}
 
 type CallExpr struct {
 	Callee string
@@ -236,73 +162,139 @@ type CallExpr struct {
 	Line   int
 }
 
-func (c *CallExpr) nodeType() string { return "CallExpr" }
-func (c *CallExpr) exprNode()        {}
+type IndexExpr struct {
+	List  Expr
+	Index Expr
+	Line  int
+}
 
-type ListLit struct{ Elements []Expr }
-
-func (l *ListLit) nodeType() string { return "ListLit" }
-func (l *ListLit) exprNode()        {}
+type ListLit struct {
+	Elements []Expr
+	Line     int
+}
 
 type MapLit struct {
 	Keys   []Expr
 	Values []Expr
-}
-
-func (m *MapLit) nodeType() string { return "MapLit" }
-func (m *MapLit) exprNode()        {}
-
-type IndexExpr struct {
-	List  Expr
-	Index Expr
-}
-
-func (i *IndexExpr) nodeType() string { return "IndexExpr" }
-func (i *IndexExpr) exprNode()        {}
-
-// Interpolated string: f"Hello {name}!"
-type InterpolatedString struct{ Parts []Expr }
-
-func (i *InterpolatedString) nodeType() string { return "InterpolatedString" }
-func (i *InterpolatedString) exprNode()        {}
-
-// ── Runner nodes ───────────────────────────────────────────────────────────────
-
-// RunnerStmt: # runner<?cmd {var} args>
-// RawCmd  = raw command template e.g. "nmap -sV {target}"
-// CaptureVar = if non-empty, stdout is captured into this variable
-// Stdin   = optional lines to feed into the process stdin
-// PipeTo  = optional chained runner (output of this feeds stdin of next)
-// Mode    = "live" (passthrough) | "capture" (return string) | "silent"
-type RunnerStmt struct {
-	RawCmd     string      // raw command template with {var} placeholders
-	CaptureVar string      // variable name to store output in (empty = live print)
-	Stdin      []Expr      // expressions whose string values are piped to stdin
-	PipeTo     *RunnerStmt // chained runner (pipe operator)
-	Mode       string      // "live" | "capture" | "silent"
-	Line       int
-}
-
-func (r *RunnerStmt) nodeType() string { return "RunnerStmt" }
-func (r *RunnerStmt) stmtNode()        {}
-
-// RunnerExpr: used when # runner<?...> appears on the right-hand side of an assignment
-type RunnerExpr struct {
-	RawCmd string
-	PipeTo *RunnerExpr
 	Line   int
 }
 
-func (r *RunnerExpr) nodeType() string { return "RunnerExpr" }
-func (r *RunnerExpr) exprNode()        {}
+type FStringExpr struct {
+	Parts []FStringPart
+	Line  int
+}
 
-// InlineFuncExpr: anonymous function used as an expression value
-// e.g. GUI.on(app, "event", func(data) { ... })
+type FStringPart struct {
+	IsExpr bool
+	Text   string
+	Expr   Expr
+}
+
+type ConcatExpr struct {
+	Left  Expr
+	Right Expr
+	Line  int
+}
+
+type RunnerExpr struct {
+	Command string
+	Pipe    string
+	Line    int
+}
+
 type InlineFuncExpr struct {
 	Params []string
 	Body   []Stmt
 	Line   int
 }
 
-func (f *InlineFuncExpr) nodeType() string { return "InlineFuncExpr" }
-func (f *InlineFuncExpr) exprNode()        {}
+// nodeType / stmtNode / exprNode markers
+
+func (n *Program) nodeType() string        { return "Program" }
+func (n *AssignStmt) nodeType() string     { return "AssignStmt" }
+func (n *MapAssignStmt) nodeType() string  { return "MapAssignStmt" }
+func (n *DoStmt) nodeType() string         { return "DoStmt" }
+func (n *ImportStmt) nodeType() string     { return "ImportStmt" }
+func (n *IfStmt) nodeType() string         { return "IfStmt" }
+func (n *LoopStmt) nodeType() string       { return "LoopStmt" }
+func (n *EachStmt) nodeType() string       { return "EachStmt" }
+func (n *MatchStmt) nodeType() string      { return "MatchStmt" }
+func (n *FuncStmt) nodeType() string       { return "FuncStmt" }
+func (n *ReturnStmt) nodeType() string     { return "ReturnStmt" }
+func (n *BreakStmt) nodeType() string      { return "BreakStmt" }
+func (n *ThrowStmt) nodeType() string      { return "ThrowStmt" }
+func (n *TryCatchStmt) nodeType() string   { return "TryCatchStmt" }
+func (n *SpawnStmt) nodeType() string      { return "SpawnStmt" }
+func (n *RunnerStmt) nodeType() string     { return "RunnerStmt" }
+func (n *ExprStmt) nodeType() string       { return "ExprStmt" }
+func (n *NumberLit) nodeType() string      { return "NumberLit" }
+func (n *StringLit) nodeType() string      { return "StringLit" }
+func (n *BoolLit) nodeType() string        { return "BoolLit" }
+func (n *NilLit) nodeType() string         { return "NilLit" }
+func (n *Identifier) nodeType() string     { return "Identifier" }
+func (n *BinaryExpr) nodeType() string     { return "BinaryExpr" }
+func (n *UnaryExpr) nodeType() string      { return "UnaryExpr" }
+func (n *CallExpr) nodeType() string       { return "CallExpr" }
+func (n *IndexExpr) nodeType() string      { return "IndexExpr" }
+func (n *ListLit) nodeType() string        { return "ListLit" }
+func (n *MapLit) nodeType() string         { return "MapLit" }
+func (n *FStringExpr) nodeType() string    { return "FStringExpr" }
+func (n *ConcatExpr) nodeType() string     { return "ConcatExpr" }
+func (n *RunnerExpr) nodeType() string     { return "RunnerExpr" }
+func (n *InlineFuncExpr) nodeType() string { return "InlineFuncExpr" }
+
+func (n *AssignStmt) stmtNode()    {}
+func (n *MapAssignStmt) stmtNode() {}
+func (n *DoStmt) stmtNode()        {}
+func (n *ImportStmt) stmtNode()    {}
+func (n *IfStmt) stmtNode()        {}
+func (n *LoopStmt) stmtNode()      {}
+func (n *EachStmt) stmtNode()      {}
+func (n *MatchStmt) stmtNode()     {}
+func (n *FuncStmt) stmtNode()      {}
+func (n *ReturnStmt) stmtNode()    {}
+func (n *BreakStmt) stmtNode()     {}
+func (n *ThrowStmt) stmtNode()     {}
+func (n *TryCatchStmt) stmtNode()  {}
+func (n *SpawnStmt) stmtNode()     {}
+func (n *RunnerStmt) stmtNode()    {}
+func (n *ExprStmt) stmtNode()      {}
+
+func (n *NumberLit) exprNode()      {}
+func (n *StringLit) exprNode()      {}
+func (n *BoolLit) exprNode()        {}
+func (n *NilLit) exprNode()         {}
+func (n *Identifier) exprNode()     {}
+func (n *BinaryExpr) exprNode()     {}
+func (n *UnaryExpr) exprNode()      {}
+func (n *CallExpr) exprNode()       {}
+func (n *IndexExpr) exprNode()      {}
+func (n *ListLit) exprNode()        {}
+func (n *MapLit) exprNode()         {}
+func (n *FStringExpr) exprNode()    {}
+func (n *ConcatExpr) exprNode()     {}
+func (n *RunnerExpr) exprNode()     {}
+func (n *InlineFuncExpr) exprNode() {}
+
+// stmtLine returns the line number of a statement, used in error messages
+func stmtLine(s Stmt) int {
+	switch v := s.(type) {
+	case *AssignStmt:    return v.Line
+	case *MapAssignStmt: return v.Line
+	case *DoStmt:        return v.Line
+	case *ImportStmt:    return v.Line
+	case *IfStmt:        return v.Line
+	case *LoopStmt:      return v.Line
+	case *EachStmt:      return v.Line
+	case *MatchStmt:     return v.Line
+	case *FuncStmt:      return v.Line
+	case *ReturnStmt:    return v.Line
+	case *BreakStmt:     return v.Line
+	case *ThrowStmt:     return v.Line
+	case *TryCatchStmt:  return v.Line
+	case *SpawnStmt:     return v.Line
+	case *RunnerStmt:    return v.Line
+	case *ExprStmt:      return v.Line
+	}
+	return 0
+}
